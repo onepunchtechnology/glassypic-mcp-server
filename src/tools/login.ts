@@ -13,7 +13,7 @@ export async function loginTool(): Promise<string> {
   // If already logged in, return current status
   const existingToken = sessionManager.getMcpToken();
   if (existingToken) {
-    const status = await getAccountStatus(baseUrl, existingToken, null);
+    const status = await getAccountStatus(baseUrl, { Authorization: `Bearer ${existingToken}` });
     if (status.logged_in) {
       return `Already logged in as ${status.email} (${status.tier} tier, ${status.credits_remaining.toLocaleString()} credits remaining).`;
     }
