@@ -6,3 +6,5 @@ startCommand:
     required: []
   commandFunction: |-
     (config) => ({ command: "npx", args: ["-y", "@tinify-ai/mcp-server"] })
+
+remoteUrl: https://app.tinify.ai/mcp
