@@ -140,12 +140,15 @@ Optimizes an image with smart lossy compression (typically 60-80% size reduction
 |-----------|------|----------|---------|-------------|
 | `input` | string | Yes | — | Absolute local file path or remote URL |
 | `output_path` | string | No | auto | File path or directory (ending in `/`). If omitted: saves next to original with SEO slug or `.tinified` suffix |
-| `output_format` | string | No | original | `jpeg`, `png`, `webp`, or `original` |
+| `output_format` | string | No | original | `jpg`, `png`, `webp`, `avif`, `gif`, or `original` |
 | `output_width_px` | int | No | — | Target width in pixels |
 | `output_height_px` | int | No | — | Target height in pixels |
-| `output_upscale_factor` | float | No | — | AI upscale factor (e.g. 2.0, 4.0) |
+| `output_upscale_factor` | int | No | — | AI upscale factor: `2` (2×) or `4` (4×) |
 | `output_resize_behavior` | string | No | pad | `pad` (white padding) or `crop` (smart crop). Only used when both width and height are set |
 | `output_seo_tag_gen` | bool | No | true | Generate SEO metadata and rename file to SEO slug. Costs 1 extra credit |
+| `output_file_size_limit` | int | No | — | Target maximum output file size in bytes. Server attempts to meet this via additional compression. Not guaranteed |
+| `gif_frame_limit` | int | No | 100 | Max frames to process for animated GIFs (1–100). Reduces credit cost by sampling fewer frames |
+| `confirm_gif_cost` | bool | No | — | Set to `true` to proceed after reviewing the animated GIF cost warning. Required for animated GIFs |
 
 ### Resize Behavior
 

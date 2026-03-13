@@ -26,9 +26,10 @@ export interface OptimizeImageParams {
   output_format?: "original" | "jpg" | "png" | "webp" | "avif" | "gif";
   output_width_px?: number;
   output_height_px?: number;
-  output_upscale_factor?: number;
+  output_upscale_factor?: 2 | 4;
   output_resize_behavior?: "pad" | "crop";
   output_seo_tag_gen?: boolean;
+  output_file_size_limit?: number;
   confirm_gif_cost?: boolean;
   gif_frame_limit?: number;
   _gif_temp_file_id?: string;
@@ -140,6 +141,9 @@ export async function optimizeImage(
   // When dimensions are set, pass resize_behavior (pad default, crop opt-in)
   if (params.output_width_px !== undefined || params.output_height_px !== undefined) {
     settings.output_resize_behavior = params.output_resize_behavior ?? "pad";
+  }
+  if (params.output_file_size_limit !== undefined) {
+    settings.output_file_size_limit = params.output_file_size_limit;
   }
   if (params.gif_frame_limit !== undefined) {
     settings.gif_frame_limit = params.gif_frame_limit;

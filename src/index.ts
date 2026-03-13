@@ -60,11 +60,9 @@ server.registerTool(
           "Target height in pixels. Set only height for proportional resize. Set both width and height for exact output dimensions (see output_resize_behavior).",
         ),
       output_upscale_factor: z
-        .number()
-        .min(0.1)
-        .max(10)
+        .union([z.literal(2), z.literal(4)])
         .optional()
-        .describe("Upscale factor (e.g., 2.0 for 2x, 4.0 for 4x). Triggers AI upscaling."),
+        .describe("AI upscale factor: 2 (2×) or 4 (4×). Uses Real-ESRGAN for high-quality upscaling."),
       output_resize_behavior: z
         .enum(["pad", "crop"])
         .optional()
@@ -78,6 +76,12 @@ server.registerTool(
         .describe(
           "Generate SEO metadata (alt text, keywords, filename) and rename output file to SEO slug. Costs 1 extra credit. Default: true.",
         ),
+      output_file_size_limit: z
+        .number()
+        .int()
+        .positive()
+        .optional()
+        .describe("Target maximum output file size in bytes. The server will attempt to meet this limit through additional compression. Not guaranteed."),
       confirm_gif_cost: z
         .boolean()
         .optional()
@@ -119,6 +123,7 @@ server.registerTool(
         output_upscale_factor: params.output_upscale_factor,
         output_resize_behavior: params.output_resize_behavior as any,
         output_seo_tag_gen: params.output_seo_tag_gen,
+        output_file_size_limit: params.output_file_size_limit,
         confirm_gif_cost: params.confirm_gif_cost,
         gif_frame_limit: params.gif_frame_limit,
         _gif_temp_file_id: params._gif_temp_file_id,

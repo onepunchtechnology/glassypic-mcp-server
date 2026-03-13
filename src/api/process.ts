@@ -3,12 +3,13 @@ import { getX402Fetch, isX402Configured, getWalletAddress } from "../x402/client
 
 export interface ProcessingSettings {
   output_format?: "original" | "jpg" | "png" | "webp" | "avif" | "gif";
-  output_upscale_factor?: number;
+  output_upscale_factor?: 2 | 4;
   output_width?: number;
   output_height?: number;
   output_resize_behavior?: "pad" | "crop";
   output_seo_tag_gen?: boolean;
   output_seo_rename?: boolean;
+  output_file_size_limit?: number;
   gif_frame_limit?: number;
 }
 
