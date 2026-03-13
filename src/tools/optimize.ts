@@ -4,7 +4,18 @@ import { uploadFile } from "../api/upload.js";
 import { triggerProcessing, type ProcessingSettings } from "../api/process.js";
 import { waitForCompletion } from "../api/status.js";
 import { downloadFile } from "../api/download.js";
-import { resolveInput } from "../utils/input.js";
+import { resolveInput as resolveInputUtil } from "../utils/input.js";
+
+/**
+ * Resolves the input path/URL, with a guard for HTTP mode (remote URLs only).
+ * Exported for testing.
+ */
+export function resolveInput(input: string): ReturnType<typeof resolveInputUtil> {
+  if (process.env.MCP_TRANSPORT === "http" && !input.startsWith("http://") && !input.startsWith("https://")) {
+    throw new Error("Local file paths are not supported in remote mode. Please provide a URL (https://...).");
+  }
+  return resolveInputUtil(input);
+}
 import { resolveUniqueOutputPath } from "../utils/output.js";
 import { DEFAULT_BASE_URL, getAuthHeaders } from "../api/client.js";
 import { SessionManager } from "../session/manager.js";
@@ -154,7 +165,23 @@ export async function optimizeImage(
     timeoutMs: params.timeoutMs ?? 60000,
   });
 
-  // 6. Download processed file
+  // 6. In HTTP mode: return download URL (no local disk write)
+  if (process.env.MCP_TRANSPORT === "http") {
+    const downloadUrl = `${baseUrl}/download/${job.id}`;
+    return {
+      output_path: downloadUrl,
+      output_size_bytes: completedJob.processed_size ?? 0,
+      output_width_px: completedJob.processed_width ?? null,
+      output_height_px: completedJob.processed_height ?? null,
+      output_format: completedJob.processed_format ?? null,
+      compression_ratio: completedJob.processed_compression_ratio ?? null,
+      seo_alt_text: completedJob.seo_alt_text ?? null,
+      seo_keywords: completedJob.seo_keywords ?? null,
+      seo_filename: completedJob.seo_filename ?? null,
+    };
+  }
+
+  // stdio mode: download to local disk (existing code)
   const downloadResult = await downloadFile({ baseUrl, jobId: job.id });
 
   // 7. Resolve output path and save
