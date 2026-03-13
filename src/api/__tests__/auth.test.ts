@@ -71,7 +71,7 @@ describe("getAccountStatus", () => {
       ok: true,
       json: async () => ({ logged_in: true, email: "a@b.com", tier: "pro", credits_remaining: 2850, credits_limit: 3000, credits_reset_at: null }),
     });
-    await getAccountStatus(BASE_URL, "mcp_xyz", null);
+    await getAccountStatus(BASE_URL, { Authorization: "Bearer mcp_xyz" });
     const [, opts] = mockFetch.mock.calls[0];
     expect(opts.headers.Authorization).toBe("Bearer mcp_xyz");
   });
@@ -81,7 +81,7 @@ describe("getAccountStatus", () => {
       ok: true,
       json: async () => ({ logged_in: false, tier: "unregistered", credits_remaining: 12, credits_limit: 20, credits_reset_at: null }),
     });
-    await getAccountStatus(BASE_URL, null, "guest_abc");
+    await getAccountStatus(BASE_URL, { "X-Session-Token": "guest_abc" });
     const [, opts] = mockFetch.mock.calls[0];
     expect(opts.headers["X-Session-Token"]).toBe("guest_abc");
   });

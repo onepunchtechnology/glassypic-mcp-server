@@ -58,16 +58,9 @@ export async function revokeToken(baseUrl: string, mcpToken: string): Promise<vo
 
 export async function getAccountStatus(
   baseUrl: string,
-  mcpToken: string | null,
-  sessionToken: string | null,
+  authHeaders: Record<string, string>,
 ): Promise<AccountStatus> {
-  const headers: Record<string, string> = {};
-  if (mcpToken) {
-    headers.Authorization = `Bearer ${mcpToken}`;
-  } else if (sessionToken) {
-    headers["X-Session-Token"] = sessionToken;
-  }
-  const response = await fetch(`${baseUrl}/mcp/auth/status`, { headers });
+  const response = await fetch(`${baseUrl}/mcp/auth/status`, { headers: authHeaders });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     throw new ApiError(body.detail || "Status check failed", response.status);

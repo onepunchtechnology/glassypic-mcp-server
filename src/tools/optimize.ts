@@ -6,8 +6,8 @@ import { waitForCompletion } from "../api/status.js";
 import { downloadFile } from "../api/download.js";
 import { resolveInput } from "../utils/input.js";
 import { resolveUniqueOutputPath } from "../utils/output.js";
+import { DEFAULT_BASE_URL, getAuthHeaders } from "../api/client.js";
 import { SessionManager } from "../session/manager.js";
-import { DEFAULT_BASE_URL } from "../api/client.js";
 
 export interface OptimizeImageParams {
   input: string;
@@ -42,13 +42,12 @@ export async function optimizeImage(
   params: OptimizeImageParams,
 ): Promise<OptimizeImageResult> {
   const baseUrl = params.baseUrl ?? DEFAULT_BASE_URL;
-  const sessionManager = new SessionManager();
 
   // 1. Resolve input (read file or fetch URL)
   const input = await resolveInput(params.input);
 
   // 2. Upload to backend (skip if reusing from GIF cost warning)
-  const authHeaders = sessionManager.getAuthHeaders();
+  const authHeaders = getAuthHeaders();
   let uploadResult: Awaited<ReturnType<typeof uploadFile>>;
 
   if (params._gif_temp_file_id && params.confirm_gif_cost) {
@@ -68,9 +67,9 @@ export async function optimizeImage(
       authHeaders,
     });
 
-    // Persist new session token if returned (for guest sessions)
-    if (uploadResult.session_token) {
-      sessionManager.saveToken(uploadResult.session_token);
+    // Persist new session token if returned (for guest sessions, stdio mode only)
+    if (uploadResult.session_token && process.env.MCP_TRANSPORT !== "http") {
+      new SessionManager().saveToken(uploadResult.session_token);
     }
   }
 

@@ -1,16 +1,11 @@
-import { SessionManager } from "../session/manager.js";
-import { DEFAULT_BASE_URL } from "../api/client.js";
+import { DEFAULT_BASE_URL, getAuthHeaders } from "../api/client.js";
 import { getAccountStatus } from "../api/auth.js";
 import { isX402Configured, getWalletAddress } from "../x402/client.js";
 
 export async function statusTool(): Promise<string> {
-  const sessionManager = new SessionManager();
   const baseUrl = process.env.TINIFY_API_URL ?? DEFAULT_BASE_URL;
-
-  const mcpToken = sessionManager.getMcpToken();
-  const sessionToken = sessionManager.getToken();
-
-  const status = await getAccountStatus(baseUrl, mcpToken, sessionToken);
+  const authHeaders = getAuthHeaders();
+  const status = await getAccountStatus(baseUrl, authHeaders);
 
   const x402Status = isX402Configured()
     ? `Pay As You Go: Enabled (wallet: ${await getWalletAddress()})`
