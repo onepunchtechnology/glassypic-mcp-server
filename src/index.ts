@@ -10,10 +10,11 @@ import { statusTool } from "./tools/status.js";
 import { upgradeTool } from "./tools/upgrade.js";
 import { formatErrorForMcp } from "./errors.js";
 
-const server = new McpServer({
-  name: "tinify",
-  version: "1.3.0",
-});
+function createServer(): McpServer {
+  const server = new McpServer({
+    name: "tinify",
+    version: "1.3.0",
+  });
 
 server.registerTool(
   "optimize_image",
@@ -21,7 +22,7 @@ server.registerTool(
     title: "Optimize Image",
     description:
       "Optimize an image: smart lossy compression (typically 60-80% size reduction), optional resize/upscale/format conversion, and AI-generated SEO metadata. " +
-      "Accepts absolute local file paths or remote URLs. Supported input formats: JPG, PNG, WebP, AVIF, GIF, HEIC, TIFF, BMP (max 50 MB). Supported output formats: JPG, PNG, WebP, AVIF, GIF. " +
+      "Accepts absolute local file paths or remote URLs. In remote/API mode, only remote URLs are supported. Supported input formats: JPG, PNG, WebP, AVIF, GIF, HEIC, TIFF, BMP (max 50 MB). Supported output formats: JPG, PNG, WebP, AVIF, GIF. " +
       "Each call costs 3 credits + 1 if SEO tags enabled. Animated GIFs are processed frame-by-frame (each frame optimized individually). " +
       "Cost = frames × per-frame operations. Use confirm_gif_cost: true after reviewing the cost warning. " +
       "Free tier: 20 credits/day, no signup. Log in with the login tool for more credits. Use status tool to check remaining credits before batch processing.",
@@ -29,7 +30,7 @@ server.registerTool(
       input: z
         .string()
         .describe(
-          "Absolute local file path or remote URL of the image to optimize. Supported inputs: JPG, PNG, WebP, AVIF, GIF (animated supported), HEIC, TIFF, BMP (max 50 MB). Tinify supports high-quality conversion between any input and output format.",
+          "Absolute local file path or remote URL of the image to optimize. Note: in remote/API mode, only remote URLs are supported (no local file paths). Supported inputs: JPG, PNG, WebP, AVIF, GIF (animated supported), HEIC, TIFF, BMP (max 50 MB). Tinify supports high-quality conversion between any input and output format.",
         ),
       output_path: z
         .string()
@@ -153,83 +154,94 @@ server.registerTool(
   },
 );
 
-server.registerTool(
-  "login",
-  {
-    title: "Log In",
-    description:
-      "Log in to your Tinify account via browser to unlock more credits. " +
-      "Opens a browser window where you complete login (Google, Facebook, or email). " +
-      "After login, MCP automatically picks up your account with shared credits across web and MCP. " +
-      "Free: 50 credits/day. Pro: 3,000/month. Max: 10,000/month.",
-    inputSchema: {},
-  },
-  async () => {
-    try {
-      const message = await loginTool();
-      return { content: [{ type: "text" as const, text: message }] };
-    } catch (error) {
-      return formatErrorForMcp(error);
-    }
-  },
-);
+  if (process.env.MCP_TRANSPORT !== "http") {
+    server.registerTool(
+      "login",
+      {
+        title: "Log In",
+        description:
+          "Log in to your Tinify account via browser to unlock more credits. " +
+          "Opens a browser window where you complete login (Google, Facebook, or email). " +
+          "After login, MCP automatically picks up your account with shared credits across web and MCP. " +
+          "Free: 50 credits/day. Pro: 3,000/month. Max: 10,000/month.",
+        inputSchema: {},
+      },
+      async () => {
+        try {
+          const message = await loginTool();
+          return { content: [{ type: "text" as const, text: message }] };
+        } catch (error) {
+          return formatErrorForMcp(error);
+        }
+      },
+    );
 
-server.registerTool(
-  "logout",
-  {
-    title: "Log Out",
-    description:
-      "Log out of your Tinify account. Reverts to guest session (20 free credits/day). " +
-      "Your web app account is not affected.",
-    inputSchema: {},
-  },
-  async () => {
-    try {
-      const message = await logoutTool();
-      return { content: [{ type: "text" as const, text: message }] };
-    } catch (error) {
-      return formatErrorForMcp(error);
-    }
-  },
-);
+    server.registerTool(
+      "logout",
+      {
+        title: "Log Out",
+        description:
+          "Log out of your Tinify account. Reverts to guest session (20 free credits/day). " +
+          "Your web app account is not affected.",
+        inputSchema: {},
+      },
+      async () => {
+        try {
+          const message = await logoutTool();
+          return { content: [{ type: "text" as const, text: message }] };
+        } catch (error) {
+          return formatErrorForMcp(error);
+        }
+      },
+    );
+  }
 
-server.registerTool(
-  "status",
-  {
-    title: "Account Status",
-    description:
-      "Check your Tinify account status: login state, tier, credits remaining, and credit reset time. " +
-      "Use this before batch processing to verify sufficient credits.",
-    inputSchema: {},
-  },
-  async () => {
-    try {
-      const message = await statusTool();
-      return { content: [{ type: "text" as const, text: message }] };
-    } catch (error) {
-      return formatErrorForMcp(error);
-    }
-  },
-);
+  server.registerTool(
+    "status",
+    {
+      title: "Account Status",
+      description:
+        "Check your Tinify account status: login state, tier, credits remaining, and credit reset time. " +
+        "Use this before batch processing to verify sufficient credits.",
+      inputSchema: {},
+    },
+    async () => {
+      try {
+        const message = await statusTool();
+        return { content: [{ type: "text" as const, text: message }] };
+      } catch (error) {
+        return formatErrorForMcp(error);
+      }
+    },
+  );
 
-server.registerTool(
-  "upgrade",
-  {
-    title: "Upgrade Plan",
-    description:
-      "Open the Tinify pricing page in your browser to upgrade your plan for more credits. " +
-      "Plans: Free (50/day), Pro (3,000/month), Max (10,000/month).",
-    inputSchema: {},
-  },
-  async () => {
-    try {
-      const message = await upgradeTool();
-      return { content: [{ type: "text" as const, text: message }] };
-    } catch (error) {
-      return formatErrorForMcp(error);
-    }
-  },
-);
+  server.registerTool(
+    "upgrade",
+    {
+      title: "Upgrade Plan",
+      description:
+        "Open the Tinify pricing page in your browser to upgrade your plan for more credits. " +
+        "Plans: Free (50/day), Pro (3,000/month), Max (10,000/month).",
+      inputSchema: {},
+    },
+    async () => {
+      try {
+        const message = await upgradeTool();
+        return { content: [{ type: "text" as const, text: message }] };
+      } catch (error) {
+        return formatErrorForMcp(error);
+      }
+    },
+  );
 
-const transport = new StdioServerTransport();
-await server.connect(transport);
+  return server;
+}
+
+if (process.env.MCP_TRANSPORT === "http") {
+  const { startHttpServer } = await import("./transport/http.js");
+  await startHttpServer(createServer);
+} else {
+  const server = createServer();
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}
