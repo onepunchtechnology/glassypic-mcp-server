@@ -27,7 +27,7 @@ export async function startHttpServer(createServer: () => McpServer): Promise<vo
   const sessions = new Map<string, Session>();
 
   // Periodic cleanup: remove idle sessions every 5 minutes
-  setInterval(() => {
+  const cleanupTimer = setInterval(() => {
     const now = Date.now();
     for (const [id, session] of sessions) {
       if (now - session.lastActivity > SESSION_IDLE_MS) {
@@ -87,9 +87,17 @@ export async function startHttpServer(createServer: () => McpServer): Promise<vo
       }
 
       const authHeaders = await resolveAuthHeaders(authHeader, existingSessionId);
-      await requestContext.run({ authHeaders, sessionId: existingSessionId }, async () => {
-        await session.transport.handleRequest(req as any, res as any, req.body);
-      });
+      try {
+        await requestContext.run({ authHeaders, sessionId: existingSessionId }, async () => {
+          await session.transport.handleRequest(req as any, res as any, req.body);
+        });
+      } catch {
+        session.transport.close();
+        sessions.delete(existingSessionId);
+        if (!res.headersSent) {
+          res.status(500).json({ error: "Internal server error" });
+        }
+      }
       return;
     }
 
@@ -116,29 +124,37 @@ export async function startHttpServer(createServer: () => McpServer): Promise<vo
       }
     }
 
+    // Pre-generate the session ID so the transport, anonStore, and sessions Map all share the same key.
+    // Without this, the anonStore would cache the anonymous JWT under a temp UUID that differs from
+    // transport.sessionId, causing a cache miss on every subsequent request.
+    const sessionId = randomUUID();
     const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: () => randomUUID(),
+      sessionIdGenerator: () => sessionId,
     });
 
     const server = createServer();
     await server.connect(transport);
 
-    // Capture the session ID assigned by the transport after handling the init request
-    const tempSessionId = randomUUID();
-    const authHeaders = await resolveAuthHeaders(authHeader, tempSessionId);
+    const authHeaders = await resolveAuthHeaders(authHeader, sessionId);
 
-    await requestContext.run({ authHeaders, sessionId: tempSessionId }, async () => {
-      await transport.handleRequest(req as any, res as any, req.body);
-    });
-
-    // After init, the transport has a session ID — store it
-    if (transport.sessionId) {
-      sessions.set(transport.sessionId, {
-        transport,
-        server,
-        lastActivity: Date.now(),
+    try {
+      await requestContext.run({ authHeaders, sessionId }, async () => {
+        await transport.handleRequest(req as any, res as any, req.body);
       });
+    } catch {
+      transport.close();
+      if (!res.headersSent) {
+        res.status(500).json({ error: "Internal server error" });
+      }
+      return;
     }
+
+    // Store session after init completes
+    sessions.set(sessionId, {
+      transport,
+      server,
+      lastActivity: Date.now(),
+    });
   });
 
   // Graceful shutdown
@@ -149,6 +165,7 @@ export async function startHttpServer(createServer: () => McpServer): Promise<vo
 
   const shutdown = () => {
     console.error("Shutting down: closing active sessions...");
+    clearInterval(cleanupTimer);
     for (const [id, session] of sessions) {
       session.transport.close();
       sessions.delete(id);
