@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-brightgreen.svg)](https://modelcontextprotocol.io)
 
-MCP server for [tinify.ai](https://tinify.ai) image optimization. AI-powered upscaling, resizing/cropping, compression, and SEO tag generation — all in one tool.
+MCP server for [tinify.ai](https://tinify.ai) image optimization. AI-powered upscaling, resizing/cropping, compression, and SEO filename & alt text generation — all in one tool.
 
 ## Quick Start
 
@@ -248,15 +248,17 @@ Alt text: Modern office workspace with laptop and coffee cup on wooden desk
 | TIFF | Yes* | No | Auto-converted to JPG at upload |
 | BMP | Yes* | No | Auto-converted to JPG at upload |
 
-Tinify supports high-quality conversion between any input and output format combination. Converting an animated GIF to a non-GIF format (JPG, PNG, WebP, AVIF) preserves only the first frame.
+tinify.ai supports high-quality conversion between any input and output format combination. 
+Converting an animated GIF to a non-GIF format (JPG, PNG, WebP, AVIF) preserves only the first frame.
+Converting an animated GIF to a GIF format supports upscaling/resizing while preserving the animation and quality. You may also reduce animated GIF file size by decreasing the number of output frames.
 
-Max file size: 50 MB.
+Max upload file size: 50 MB.
 
 ## How It Works
 
 ```
 Local file or URL
-  → Upload to Tinify API
+  → Upload to Tinify.ai API
     → Smart compression (lossy, typically 60-80% reduction)
     → AI SEO tag generation (alt text, keywords, filename)
     → Optional: resize, upscale, format conversion
@@ -264,7 +266,7 @@ Local file or URL
     → Save with SEO filename slug (or .tinified suffix if SEO disabled)
 ```
 
-All processing happens server-side via the [Tinify API](https://tinify.ai). The MCP server is a thin client that orchestrates the pipeline.
+All processing happens server-side via the [Tinify.ai API](https://api.tinify.ai). The MCP server is a thin client that orchestrates the pipeline.
 
 ## Credits
 
@@ -319,7 +321,7 @@ Opens [tinify.ai/pricing](https://tinify.ai/pricing) in your browser.
 Paste this into your `CLAUDE.md` or system prompt to help agents use the tool effectively:
 
 ```
-## Tinify MCP
+## Tinify.ai MCP
 
 Tools: optimize_image, login, logout, status, upgrade
 
