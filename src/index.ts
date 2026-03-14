@@ -22,7 +22,7 @@ server.registerTool(
     title: "Optimize Image",
     description:
       "Optimize an image: smart lossy compression (typically 60-80% size reduction), optional resize/upscale/format conversion, and AI-generated SEO metadata. " +
-      "Accepts absolute local file paths or remote URLs. In remote/API mode, only remote URLs are supported. Supported input formats: JPG, PNG, WebP, AVIF, GIF, HEIC, TIFF, BMP (max 50 MB). Supported output formats: JPG, PNG, WebP, AVIF, GIF. " +
+      "Accepts absolute local file paths or remote URLs. In remote/API mode, only remote URLs are supported. Supported input formats: JPG, PNG, WebP, AVIF, GIF, SVG, ICO, HEIC, TIFF, BMP (max 50 MB). Supported output formats: JPG, PNG, WebP, AVIF, GIF, SVG, ICO. " +
       "Each call costs 3 credits + 1 if SEO tags enabled. Animated GIFs are processed frame-by-frame (each frame optimized individually). " +
       "Cost = frames × per-frame operations. Use confirm_gif_cost: true after reviewing the cost warning. " +
       "Free tier: 20 credits/day, no signup. Log in with the login tool for more credits. Use status tool to check remaining credits before batch processing.",
@@ -40,9 +40,9 @@ server.registerTool(
           "If omitted: saves next to original, named with SEO slug when SEO is enabled or .tinified suffix otherwise. URLs save to current working directory.",
         ),
       output_format: z
-        .enum(["original", "jpg", "png", "webp", "avif", "gif"])
+        .enum(["original", "jpg", "png", "webp", "avif", "gif", "svg", "ico"])
         .optional()
-        .describe("Output format. Defaults to 'original' (keep input format). Animated GIFs stay animated when output is 'gif'; converting to other formats preserves only the first frame."),
+        .describe("Output format. Defaults to 'original' (keep input format). Animated GIFs stay animated when output is 'gif'; converting to other formats preserves only the first frame. SVG output from raster input uses vector tracing. ICO output generates a favicon set (16, 24, 32, 48, 256px) unless a specific size is given."),
       output_width_px: z
         .number()
         .int()

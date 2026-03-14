@@ -247,15 +247,39 @@ Alt text: Modern office workspace with laptop and coffee cup on wooden desk
 | WebP | Yes | Yes | |
 | AVIF | Yes | Yes | |
 | GIF | Yes | Yes | Animated GIFs preserved when output is GIF |
+| SVG | Yes | Yes | SVG→SVG optimized via SVGO; raster↔SVG conversion supported |
+| ICO | Yes | Yes | Smart rebuild: generates 16, 24, 32, 48, 256px favicon set |
 | HEIC/HEIF | Yes* | No | Auto-converted to JPG at upload |
 | TIFF | Yes* | No | Auto-converted to JPG at upload |
 | BMP | Yes* | No | Auto-converted to JPG at upload |
 
-tinify.ai supports high-quality conversion between any input and output format combination. 
+tinify.ai supports high-quality conversion between any input and output format combination.
 Converting an animated GIF to a non-GIF format (JPG, PNG, WebP, AVIF) preserves only the first frame.
 Converting an animated GIF to a GIF format supports upscaling/resizing while preserving the animation and quality. You may also reduce animated GIF file size by decreasing the number of output frames.
 
 Max upload file size: 50 MB.
+
+### SVG & ICO Examples
+
+```
+# Optimize an SVG file (keeps as vector)
+Optimize logo.svg and keep it as SVG
+
+# Convert SVG to raster
+Convert icon.svg to a 512x512 PNG
+
+# Trace raster to vector SVG
+Convert my logo.png to a vector SVG
+
+# Generate favicon set from any image
+Convert logo.png to an ICO favicon
+
+# Generate single-size ICO
+Convert logo.png to a 32x32 ICO
+
+# Extract largest icon from ICO
+Convert favicon.ico to PNG
+```
 
 ## How It Works
 

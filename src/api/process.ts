@@ -2,7 +2,7 @@ import { ApiError } from "./client.js";
 import { getX402Fetch, isX402Configured, getWalletAddress } from "../x402/client.js";
 
 export interface ProcessingSettings {
-  output_format?: "original" | "jpg" | "png" | "webp" | "avif" | "gif";
+  output_format?: "original" | "jpg" | "png" | "webp" | "avif" | "gif" | "svg" | "ico";
   output_upscale_factor?: 2 | 4;
   output_width?: number;
   output_height?: number;

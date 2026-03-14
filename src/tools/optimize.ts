@@ -23,7 +23,7 @@ import { SessionManager } from "../session/manager.js";
 export interface OptimizeImageParams {
   input: string;
   output_path?: string;
-  output_format?: "original" | "jpg" | "png" | "webp" | "avif" | "gif";
+  output_format?: "original" | "jpg" | "png" | "webp" | "avif" | "gif" | "svg" | "ico";
   output_width_px?: number;
   output_height_px?: number;
   output_upscale_factor?: 2 | 4;
