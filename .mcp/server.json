@@ -1,17 +1,23 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.onepunchtechnology/tinify-ai",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "MCP server for Tinify image optimization — one tool, max optimization",
   "repository": {
     "url": "https://github.com/onepunchtechnology/tinify-ai-mcp-server",
     "source": "github"
   },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://app.tinify.ai/mcp"
+    }
+  ],
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@tinify-ai/mcp-server",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "transport": {
         "type": "stdio"
       }
