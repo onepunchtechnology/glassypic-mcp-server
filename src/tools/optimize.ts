@@ -1,10 +1,10 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { uploadFile } from "../api/upload.js";
+import { uploadFile, uploadUrl } from "../api/upload.js";
 import { triggerProcessing, type ProcessingSettings } from "../api/process.js";
 import { waitForCompletion } from "../api/status.js";
 import { downloadFile } from "../api/download.js";
-import { resolveInput as resolveInputUtil } from "../utils/input.js";
+import { resolveInput as resolveInputUtil, isUrl, extractFilenameFromUrl } from "../utils/input.js";
 
 /**
  * Resolves the input path/URL, with a guard for HTTP mode (remote URLs only).
@@ -55,23 +55,44 @@ export async function optimizeImage(
 ): Promise<OptimizeImageResult> {
   const baseUrl = params.baseUrl ?? DEFAULT_BASE_URL;
 
-  // 1. Resolve input (read file or fetch URL)
-  const input = await resolveInput(params.input);
-
-  // 2. Upload to backend (skip if reusing from GIF cost warning)
+  // 1. Resolve input and upload
   const authHeaders = getAuthHeaders();
   let uploadResult: Awaited<ReturnType<typeof uploadFile>>;
+  let inputFilename: string;
+  let inputIsUrl: boolean;
 
   if (params._gif_temp_file_id && params.confirm_gif_cost) {
     // Reuse the upload from a previous GIF cost warning — no re-upload needed
+    inputFilename = isUrl(params.input)
+      ? extractFilenameFromUrl(params.input)
+      : (await resolveInput(params.input)).filename;
+    inputIsUrl = isUrl(params.input);
     uploadResult = {
       temp_file_id: params._gif_temp_file_id,
-      original_filename: input.filename,
-      file_size: input.buffer.length,
+      original_filename: inputFilename,
+      file_size: 0,
       mime_type: "image/gif",
       session_token: null,
     };
+  } else if (isUrl(params.input)) {
+    // URL input: use server-side fetch (skip client-side download)
+    inputFilename = extractFilenameFromUrl(params.input);
+    inputIsUrl = true;
+    uploadResult = await uploadUrl({
+      baseUrl,
+      url: params.input,
+      filename: inputFilename,
+      authHeaders,
+    });
+
+    if (uploadResult.session_token && process.env.MCP_TRANSPORT !== "http") {
+      new SessionManager().saveToken(uploadResult.session_token);
+    }
   } else {
+    // Local file: read bytes and upload
+    const input = await resolveInput(params.input);
+    inputFilename = input.filename;
+    inputIsUrl = input.isUrl;
     uploadResult = await uploadFile({
       baseUrl,
       fileBuffer: input.buffer,
@@ -79,7 +100,6 @@ export async function optimizeImage(
       authHeaders,
     });
 
-    // Persist new session token if returned (for guest sessions, stdio mode only)
     if (uploadResult.session_token && process.env.MCP_TRANSPORT !== "http") {
       new SessionManager().saveToken(uploadResult.session_token);
     }
@@ -97,7 +117,7 @@ export async function optimizeImage(
     const totalCost = framesToProcess * perFrameCost + tagCost;
 
     const warning = [
-      `Animated GIF detected: ${input.filename}`,
+      `Animated GIF detected: ${inputFilename}`,
       `  ${uploadResult.gif_frame_count} frames, ${uploadResult.gif_fps ?? "?"} fps`,
       `  ${framesToProcess} frames × ${perFrameCost} credits = ${totalCost} credits`,
       ``,
@@ -191,8 +211,8 @@ export async function optimizeImage(
   // 7. Resolve output path and save
   const outputPath = resolveUniqueOutputPath({
     inputPath: params.input,
-    isUrl: input.isUrl,
-    filename: input.filename,
+    isUrl: inputIsUrl,
+    filename: inputFilename,
     outputPath: params.output_path,
     outputFormat:
       params.output_format && params.output_format !== "original"

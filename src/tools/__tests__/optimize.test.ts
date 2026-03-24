@@ -6,6 +6,7 @@ import * as os from "node:os";
 // Mock all API modules before importing optimize
 vi.mock("../../api/upload.js", () => ({
   uploadFile: vi.fn(),
+  uploadUrl: vi.fn(),
 }));
 vi.mock("../../api/process.js", () => ({
   triggerProcessing: vi.fn(),
@@ -21,7 +22,7 @@ vi.mock("../../session/manager.js", () => ({
 }));
 
 import { optimizeImage } from "../optimize.js";
-import { uploadFile } from "../../api/upload.js";
+import { uploadFile, uploadUrl } from "../../api/upload.js";
 import { triggerProcessing } from "../../api/process.js";
 import { waitForCompletion } from "../../api/status.js";
 import { downloadFile } from "../../api/download.js";
@@ -145,23 +146,11 @@ describe("optimizeImage", () => {
   });
 
   describe("URL input", () => {
-    afterEach(() => {
-      vi.unstubAllGlobals();
-    });
-
-    it("fetches URL input via HTTP before uploading", async () => {
-      vi.stubGlobal(
-        "fetch",
-        vi.fn().mockResolvedValueOnce({
-          ok: true,
-          arrayBuffer: async () => new TextEncoder().encode("url-image-data").buffer,
-        }),
-      );
-
-      vi.mocked(uploadFile).mockResolvedValueOnce({
+    it("uses uploadUrl for URL inputs instead of uploadFile", async () => {
+      vi.mocked(uploadUrl).mockResolvedValueOnce({
         temp_file_id: "temp-url",
         original_filename: "photo.jpg",
-        file_size: 14,
+        file_size: 14000,
         mime_type: "image/jpeg",
         session_token: null,
       });
@@ -191,10 +180,11 @@ describe("optimizeImage", () => {
         output_path: tmpDir + "/",
       });
 
-      expect(vi.mocked(uploadFile)).toHaveBeenCalledWith(
-        expect.objectContaining({ filename: "photo.jpg" }),
+      expect(vi.mocked(uploadUrl)).toHaveBeenCalledWith(
+        expect.objectContaining({ url: "https://cdn.example.com/photo.jpg", filename: "photo.jpg" }),
       );
-      expect(result.output_path).toContain("photo.tinified.jpg");
+      expect(vi.mocked(uploadFile)).not.toHaveBeenCalled();
+      expect(result.output_path).toContain("photo");
     });
   });
 
