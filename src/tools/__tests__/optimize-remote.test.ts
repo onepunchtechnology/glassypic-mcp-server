@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Mock API modules to avoid real HTTP calls in the download URL test
-vi.mock("../../api/upload.js", () => ({ uploadFile: vi.fn() }));
+vi.mock("../../api/upload.js", () => ({ uploadFile: vi.fn(), uploadUrl: vi.fn() }));
 vi.mock("../../api/process.js", () => ({ triggerProcessing: vi.fn() }));
 vi.mock("../../api/status.js", () => ({ waitForCompletion: vi.fn() }));
 vi.mock("../../api/download.js", () => ({ downloadFile: vi.fn() }));
@@ -35,11 +35,11 @@ describe("optimize_image in remote mode", () => {
   });
 
   it("returns download URL instead of local path in HTTP mode", async () => {
-    const { uploadFile } = await import("../../api/upload.js");
+    const { uploadUrl } = await import("../../api/upload.js");
     const { triggerProcessing } = await import("../../api/process.js");
     const { waitForCompletion } = await import("../../api/status.js");
 
-    vi.mocked(uploadFile).mockResolvedValueOnce({
+    vi.mocked(uploadUrl).mockResolvedValueOnce({
       temp_file_id: "temp-1",
       original_filename: "photo.jpg",
       file_size: 100000,
@@ -65,13 +65,6 @@ describe("optimize_image in remote mode", () => {
       seo_filename: "photo",
     });
 
-    // Mock fetch for URL input
-    const mockFetch = vi.fn().mockResolvedValueOnce({
-      ok: true,
-      arrayBuffer: async () => new ArrayBuffer(100000),
-    });
-    vi.stubGlobal("fetch", mockFetch);
-
     const { optimizeImage } = await import("../optimize.js");
     const result = await optimizeImage({
       input: "https://example.com/photo.jpg",
@@ -82,7 +75,5 @@ describe("optimize_image in remote mode", () => {
     expect(result.output_path).toBe("https://api.tinify.ai/download/job-abc");
     expect(result.output_size_bytes).toBe(45000);
     expect(result.output_format).toBe("jpg");
-
-    vi.unstubAllGlobals();
   });
 });
