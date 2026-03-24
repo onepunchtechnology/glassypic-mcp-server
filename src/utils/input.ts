@@ -11,7 +11,7 @@ export function isUrl(input: string): boolean {
   return input.startsWith("http://") || input.startsWith("https://");
 }
 
-function extractFilenameFromUrl(url: string): string {
+export function extractFilenameFromUrl(url: string): string {
   try {
     const pathname = new URL(url).pathname;
     const basename = path.basename(pathname);

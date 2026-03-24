@@ -56,3 +56,40 @@ export async function uploadFile(params: UploadParams): Promise<UploadResult> {
 
   return response.json();
 }
+
+interface UploadUrlParams {
+  baseUrl: string;
+  url: string;
+  filename?: string;
+  authHeaders: Record<string, string>;
+}
+
+export async function uploadUrl(params: UploadUrlParams): Promise<UploadResult> {
+  const { baseUrl, url, filename, authHeaders } = params;
+
+  const body: Record<string, string> = { url };
+  if (filename) body.filename = filename;
+
+  const response = await fetch(`${baseUrl}/upload/url`, {
+    method: "POST",
+    headers: {
+      ...authHeaders,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    if (response.status === 413) {
+      throw new ApiError("File exceeds maximum size limit.", response.status, errorBody.detail);
+    }
+    throw new ApiError(
+      errorBody.detail || "URL upload failed",
+      response.status,
+      errorBody.detail,
+    );
+  }
+
+  return response.json();
+}
