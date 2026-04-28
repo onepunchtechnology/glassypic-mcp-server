@@ -26,16 +26,43 @@ No API key or signup required. Works out of the box with 20 free daily credits.
 | Cline | MCP settings in Cline UI (Settings → MCP Servers → Add) |
 | Cursor | `.cursor/mcp.json` in your project root |
 | Windsurf | `~/.codeium/windsurf/mcp_config.json` |
-| OpenAI Codex CLI | `~/.codex/config.toml` (TOML format — see below) |
-| Gemini CLI | `~/.gemini/settings.json` (global) or `.gemini/settings.json` (project) |
+| OpenAI Codex CLI | `codex mcp add tinify -- npx -y @tinify-ai/mcp-server@latest` or `~/.codex/config.toml` |
+| Gemini CLI | `gemini mcp add --transport stdio tinify npx -y @tinify-ai/mcp-server@latest` or `~/.gemini/settings.json` |
 
-### OpenAI Codex CLI (TOML)
+### OpenAI Codex CLI
+
+```bash
+codex mcp add tinify -- npx -y @tinify-ai/mcp-server@latest
+```
+
+Or add manually to `~/.codex/config.toml`:
 
 ```toml
 [mcp_servers.tinify]
 command = "npx"
-args = ["-y", "@tinify-ai/mcp-server"]
+args = ["-y", "@tinify-ai/mcp-server@latest"]
 ```
+
+### Gemini CLI
+
+```bash
+gemini mcp add --transport stdio tinify npx -y @tinify-ai/mcp-server@latest
+```
+
+Or add manually to `~/.gemini/settings.json` (global) or `.gemini/settings.json` in your project root:
+
+```json
+{
+  "mcpServers": {
+    "tinify": {
+      "command": "npx",
+      "args": ["-y", "@tinify-ai/mcp-server@latest"]
+    }
+  }
+}
+```
+
+Verify the server is connected with `/mcp list` inside Gemini CLI.
 
 ## Verification
 

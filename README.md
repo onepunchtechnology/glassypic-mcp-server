@@ -104,7 +104,11 @@ Open Cline settings → MCP Servers → Add, then paste:
 <details>
 <summary><strong>Gemini CLI</strong></summary>
 
-Edit `~/.gemini/settings.json` (global) or `.gemini/settings.json` in your project root:
+```bash
+gemini mcp add --transport stdio tinify npx -y @tinify-ai/mcp-server@latest
+```
+
+Or edit `~/.gemini/settings.json` (global) or `.gemini/settings.json` in your project root:
 
 ```json
 {
@@ -116,12 +120,18 @@ Edit `~/.gemini/settings.json` (global) or `.gemini/settings.json` in your proje
   }
 }
 ```
+
+Verify it's running inside Gemini CLI with `/mcp list`.
 </details>
 
 <details>
 <summary><strong>OpenAI Codex CLI</strong></summary>
 
-Edit `~/.codex/config.toml`:
+```bash
+codex mcp add tinify -- npx -y @tinify-ai/mcp-server@latest
+```
+
+Or edit `~/.codex/config.toml` manually:
 
 ```toml
 [mcp_servers.tinify]
@@ -400,7 +410,7 @@ Tools: optimize_image, login, logout, status, upgrade
 ## Requirements
 
 - Node.js >= 18
-- An MCP-compatible client (Claude Desktop, Claude Code, Cursor, Windsurf, Cline, etc.)
+- An MCP-compatible client (Claude Desktop, Claude Code, Cursor, Windsurf, Cline, OpenAI Codex CLI, Gemini CLI, etc.)
 
 ## License
 
