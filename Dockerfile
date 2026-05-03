@@ -19,16 +19,14 @@ WORKDIR /app
 # Create non-root user for security
 RUN addgroup -g 1001 appgroup && adduser -u 1001 -G appgroup -S appuser
 
-# Copy package files and install production dependencies
+# Copy package files and install production dependencies; set ownership in one layer
 COPY package.json package-lock.json ./
 COPY packages/mcp-server/package.json ./packages/mcp-server/
-RUN npm ci -w packages/mcp-server --omit=dev
+RUN npm ci -w packages/mcp-server --omit=dev && chown -R appuser:appgroup /app
 
-# Copy built artifacts from builder
-COPY --from=build /app/packages/mcp-server/dist/ ./packages/mcp-server/dist/
+# Copy built artifacts with correct ownership
+COPY --chown=appuser:appgroup --from=build /app/packages/mcp-server/dist/ ./packages/mcp-server/dist/
 
-# Set ownership
-RUN chown -R appuser:appgroup /app
 USER appuser
 
 WORKDIR /app/packages/mcp-server
