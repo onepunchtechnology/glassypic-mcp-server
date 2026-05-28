@@ -31,4 +31,6 @@ USER appuser
 
 WORKDIR /app/packages/mcp-server
 
+EXPOSE 8080
+
 ENTRYPOINT ["node", "dist/index.js"]
