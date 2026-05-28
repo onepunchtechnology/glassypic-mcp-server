@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "tinify-ai",
   "display_name": "Tinify.ai",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "AI-powered image optimization — compress, resize, upscale, and generate SEO tags. One tool, all formats.",
   "long_description": "Tinify.ai optimizes images using AI-powered compression (typically 60-80% size reduction), with optional resize, upscale, format conversion, and SEO metadata generation. Supports JPEG, PNG, WebP, HEIC, GIF, AVIF, TIFF, and BMP. Free to use with 20 credits/day as a guest — no signup required.",
   "author": {

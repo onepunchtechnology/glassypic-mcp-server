@@ -1,6 +1,6 @@
 {
   "name": "@tinify-ai/mcp-server",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "MCP server for Tinify image optimization — one tool, max optimization",
   "type": "module",
   "bin": {
