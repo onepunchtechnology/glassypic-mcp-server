@@ -30,8 +30,23 @@ describe("optimize_image in remote mode", () => {
   });
 
   it("accepts URLs in HTTP mode", async () => {
-    const { resolveInput } = await import("../optimize.js");
-    expect(() => resolveInput("https://example.com/image.png")).not.toThrow();
+    // Stub fetch so the URL branch of resolveInput does not make a real network
+    // call (the test must stay hermetic and the promise must be awaited).
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => new ArrayBuffer(8),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      const { resolveInput } = await import("../optimize.js");
+      const resolved = await resolveInput("https://example.com/image.png");
+
+      expect(resolved.isUrl).toBe(true);
+      expect(resolved.filename).toBe("image.png");
+      expect(fetchMock).toHaveBeenCalledWith("https://example.com/image.png");
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("returns download URL instead of local path in HTTP mode", async () => {
