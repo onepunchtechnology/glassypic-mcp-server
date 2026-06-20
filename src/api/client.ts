@@ -3,7 +3,7 @@ export interface ClientConfig {
   sessionToken: string | null;
 }
 
-export const DEFAULT_BASE_URL = "https://api.tinify.ai";
+export const DEFAULT_BASE_URL = "https://api.glassypic.com";
 
 export class ApiError extends Error {
   constructor(

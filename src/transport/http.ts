@@ -61,7 +61,7 @@ export async function startHttpServer(createServer: () => McpServer): Promise<vo
   // Static MCP server card — allows Smithery to scan tools without auth
   app.get("/.well-known/mcp/server-card.json", (_req, res) => {
     res.json({
-      serverInfo: { name: "tinify", version: process.env.npm_package_version ?? "1.3.0" },
+      serverInfo: { name: "glassypic", version: process.env.npm_package_version ?? "1.3.0" },
       authentication: { schemes: ["bearer"], required: false },
     });
   });
