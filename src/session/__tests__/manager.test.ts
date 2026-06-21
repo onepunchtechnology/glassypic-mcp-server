@@ -116,6 +116,13 @@ describe("legacy ~/.tinify migration (rename landmine)", () => {
       fs.rmSync(customDir, { recursive: true, force: true });
     }
   });
+
+  it("treats an explicit empty-string sessionDir as custom mode (no legacy migration)", () => {
+    writeLegacy({ session_token: "legacy_guest" });
+    // "" is an explicit dir, not default mode — must NOT migrate the real legacy
+    // session forward (which would also write it to a relative ./session.json).
+    expect(new SessionManager("").getToken()).toBeNull();
+  });
 });
 
 describe("mcp_token", () => {

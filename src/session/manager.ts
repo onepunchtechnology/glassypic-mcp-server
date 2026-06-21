@@ -18,11 +18,15 @@ export class SessionManager {
   private readonly legacySessionFile: string | null;
 
   constructor(sessionDir?: string) {
-    this.sessionDir = sessionDir ?? path.join(os.homedir(), ".glassypic");
+    // Only an omitted argument is "default mode". An explicit value — including
+    // "" — is a custom dir and must NOT trigger legacy ~/.tinify migration (that
+    // would write real credentials to a relative ./session.json).
+    const isDefault = sessionDir === undefined;
+    this.sessionDir = isDefault ? path.join(os.homedir(), ".glassypic") : sessionDir;
     this.sessionFile = path.join(this.sessionDir, "session.json");
-    this.legacySessionFile = sessionDir
-      ? null
-      : path.join(os.homedir(), ".tinify", "session.json");
+    this.legacySessionFile = isDefault
+      ? path.join(os.homedir(), ".tinify", "session.json")
+      : null;
   }
 
   private parseFile(file: string): SessionData | null {

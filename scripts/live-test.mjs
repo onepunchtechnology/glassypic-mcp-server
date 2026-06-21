@@ -45,14 +45,15 @@ const dim   = (s) => `\x1b[2m${s}\x1b[0m`;
 
 // ── MCP test client ───────────────────────────────────────────────────────────
 class MCPClient {
-  constructor() {
+  constructor(env) {
     this._proc = null;
     this._pending = new Map();
     this._nextId = 1;
+    this._env = env;
   }
 
   start() {
-    this._proc = spawn("node", [SERVER_BIN], { stdio: ["pipe", "pipe", "pipe"] });
+    this._proc = spawn("node", [SERVER_BIN], { stdio: ["pipe", "pipe", "pipe"], env: this._env ?? process.env });
     const rl = createInterface({ input: this._proc.stdout });
     rl.on("line", (line) => {
       if (!line.trim()) return;
@@ -133,23 +134,16 @@ const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "glassypic-live-"));
 const inputPng = path.join(tmpDir, "test.png");
 fs.writeFileSync(inputPng, TINY_PNG);
 
-// Wipe the session so tests run as a fresh anonymous user — NOT as a logged-in
-// developer, which would spend real paid credits. SessionManager migrates the
-// legacy ~/.tinify file forward to ~/.glassypic on read, so BOTH must be cleared
-// or the migrated token gets picked up.
-const sessionFile = path.join(os.homedir(), ".glassypic", "session.json");
-const legacySessionFile = path.join(os.homedir(), ".tinify", "session.json");
-let savedSession = null;
-for (const f of [sessionFile, legacySessionFile]) {
-  if (fs.existsSync(f)) {
-    if (savedSession === null) savedSession = fs.readFileSync(f, "utf-8");
-    fs.unlinkSync(f);
-  }
-}
+// Run the server child with an isolated HOME so it never reads or writes the real
+// developer session (~/.glassypic/session.json) — guaranteeing an anonymous run.
+// Unlike deleting/restoring the real file, this can't lose credentials on a spawn
+// failure, an interruption, or with pre-existing sessions at multiple paths.
+const tmpHome = fs.mkdtempSync(path.join(os.tmpdir(), "glassypic-live-home-"));
+const sessionFile = path.join(tmpHome, ".glassypic", "session.json");
 
 console.log(bold("\n@glassypic/mcp-server — live functional tests (anonymous user)\n"));
 
-const client = new MCPClient();
+const client = new MCPClient({ ...process.env, HOME: tmpHome, USERPROFILE: tmpHome });
 client.start();
 
 try {
@@ -189,7 +183,7 @@ try {
 
   await test("optimize_image has optional params in schema", async () => {
     const tool = toolsList.tools.find((t) => t.name === "optimize_image");
-    const optional = ["output_path","output_format","output_width_px","output_height_px","output_upscale_factor","output_resize_mode","output_aspect_lock","output_seo_tag_gen"];
+    const optional = ["output_path","output_format","output_width_px","output_height_px","output_upscale_factor","output_resize_behavior","output_seo_tag_gen","output_file_size_limit","confirm_gif_cost","gif_frame_limit"];
     for (const field of optional) {
       assert(tool.inputSchema?.properties?.[field], `missing optional param: ${field}`);
     }
@@ -335,14 +329,9 @@ try {
 } finally {
   client.stop();
 
-  // Restore original session if one existed
-  if (savedSession) {
-    fs.mkdirSync(path.dirname(sessionFile), { recursive: true });
-    fs.writeFileSync(sessionFile, savedSession);
-  }
-
-  // Cleanup output files but keep session
+  // Isolated HOME — no real files were touched, so just remove the temp dirs.
   fs.rmSync(tmpDir, { recursive: true, force: true });
+  fs.rmSync(tmpHome, { recursive: true, force: true });
 }
 
 // ── Summary ───────────────────────────────────────────────────────────────────
