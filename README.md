@@ -1,10 +1,10 @@
-# @tinify-ai/mcp-server
+# @glassypic/mcp-server
 
-[![npm version](https://img.shields.io/npm/v/@tinify-ai/mcp-server.svg)](https://www.npmjs.com/package/@tinify-ai/mcp-server)
+[![npm version](https://img.shields.io/npm/v/@glassypic/mcp-server.svg)](https://www.npmjs.com/package/@glassypic/mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-brightgreen.svg)](https://modelcontextprotocol.io)
 
-MCP server for [tinify.ai](https://tinify.ai) image optimization. AI-powered upscaling, resizing/cropping, compression, and SEO filename & alt text generation — all in one tool.
+MCP server for [GlassyPic](https://glassypic.com) image optimization. AI-powered upscaling, resizing/cropping, compression, and SEO filename & alt text generation — all in one tool.
 
 ## Quick Start
 
@@ -13,9 +13,9 @@ Add to your MCP client config:
 ```json
 {
   "mcpServers": {
-    "tinify": {
+    "glassypic": {
       "command": "npx",
-      "args": ["-y", "@tinify-ai/mcp-server@latest"]
+      "args": ["-y", "@glassypic/mcp-server@latest"]
     }
   }
 }
@@ -33,9 +33,9 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 ```json
 {
   "mcpServers": {
-    "tinify": {
+    "glassypic": {
       "command": "npx",
-      "args": ["-y", "@tinify-ai/mcp-server@latest"]
+      "args": ["-y", "@glassypic/mcp-server@latest"]
     }
   }
 }
@@ -46,7 +46,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 <summary><strong>Claude Code</strong></summary>
 
 ```bash
-claude mcp add tinify -- npx -y @tinify-ai/mcp-server@latest
+claude mcp add glassypic -- npx -y @glassypic/mcp-server@latest
 ```
 </details>
 
@@ -58,9 +58,9 @@ Add to `.cursor/mcp.json` in your project root:
 ```json
 {
   "mcpServers": {
-    "tinify": {
+    "glassypic": {
       "command": "npx",
-      "args": ["-y", "@tinify-ai/mcp-server@latest"]
+      "args": ["-y", "@glassypic/mcp-server@latest"]
     }
   }
 }
@@ -75,9 +75,9 @@ Edit `~/.codeium/windsurf/mcp_config.json`:
 ```json
 {
   "mcpServers": {
-    "tinify": {
+    "glassypic": {
       "command": "npx",
-      "args": ["-y", "@tinify-ai/mcp-server@latest"]
+      "args": ["-y", "@glassypic/mcp-server@latest"]
     }
   }
 }
@@ -92,9 +92,9 @@ Open Cline settings → MCP Servers → Add, then paste:
 ```json
 {
   "mcpServers": {
-    "tinify": {
+    "glassypic": {
       "command": "npx",
-      "args": ["-y", "@tinify-ai/mcp-server@latest"]
+      "args": ["-y", "@glassypic/mcp-server@latest"]
     }
   }
 }
@@ -105,7 +105,7 @@ Open Cline settings → MCP Servers → Add, then paste:
 <summary><strong>Gemini CLI</strong></summary>
 
 ```bash
-gemini mcp add --transport stdio tinify npx -y @tinify-ai/mcp-server@latest
+gemini mcp add --transport stdio glassypic npx -y @glassypic/mcp-server@latest
 ```
 
 Or edit `~/.gemini/settings.json` (global) or `.gemini/settings.json` in your project root:
@@ -113,9 +113,9 @@ Or edit `~/.gemini/settings.json` (global) or `.gemini/settings.json` in your pr
 ```json
 {
   "mcpServers": {
-    "tinify": {
+    "glassypic": {
       "command": "npx",
-      "args": ["-y", "@tinify-ai/mcp-server@latest"]
+      "args": ["-y", "@glassypic/mcp-server@latest"]
     }
   }
 }
@@ -128,15 +128,15 @@ Verify it's running inside Gemini CLI with `/mcp list`.
 <summary><strong>OpenAI Codex CLI</strong></summary>
 
 ```bash
-codex mcp add tinify -- npx -y @tinify-ai/mcp-server@latest
+codex mcp add glassypic -- npx -y @glassypic/mcp-server@latest
 ```
 
 Or edit `~/.codex/config.toml` manually:
 
 ```toml
-[mcp_servers.tinify]
+[mcp_servers.glassypic]
 command = "npx"
-args = ["-y", "@tinify-ai/mcp-server@latest"]
+args = ["-y", "@glassypic/mcp-server@latest"]
 ```
 </details>
 
@@ -263,7 +263,7 @@ Alt text: Modern office workspace with laptop and coffee cup on wooden desk
 | TIFF | Yes* | No | Auto-converted to JPG at upload |
 | BMP | Yes* | No | Auto-converted to JPG at upload |
 
-tinify.ai supports high-quality conversion between any input and output format combination.
+GlassyPic supports high-quality conversion between any input and output format combination.
 Converting an animated GIF to a non-GIF format (JPG, PNG, WebP, AVIF) preserves only the first frame.
 Converting an animated GIF to a GIF format supports upscaling/resizing while preserving the animation and quality. You may also reduce animated GIF file size by decreasing the number of output frames.
 
@@ -295,7 +295,7 @@ Convert favicon.ico to PNG
 
 ```
 Local file or URL
-  → Upload to Tinify.ai API
+  → Upload to GlassyPic API
     → Smart compression (lossy, typically 60-80% reduction)
     → AI SEO tag generation (alt text, keywords, filename)
     → Optional: resize, upscale, format conversion
@@ -303,7 +303,7 @@ Local file or URL
     → Save with SEO filename slug (or .tinified suffix if SEO disabled)
 ```
 
-All processing happens server-side via the [Tinify.ai API](https://api.tinify.ai). The MCP server is a thin client that orchestrates the pipeline.
+All processing happens server-side via the [GlassyPic API](https://api.glassypic.com). The MCP server is a thin client that orchestrates the pipeline.
 
 ## Credits
 
@@ -351,14 +351,14 @@ Revokes the session and reverts to guest mode (20 credits/day).
 
 ### upgrade
 
-Opens [tinify.ai/pricing](https://tinify.ai/pricing) in your browser.
+Opens [glassypic.com/pricing](https://glassypic.com/pricing) in your browser.
 
 ## Tips for AI Agents
 
 Paste this into your `CLAUDE.md` or system prompt to help agents use the tool effectively:
 
 ```
-## Tinify.ai MCP
+## GlassyPic MCP
 
 Tools: optimize_image, login, logout, status, upgrade
 
@@ -382,7 +382,7 @@ Tools: optimize_image, login, logout, status, upgrade
 **Server not appearing in tool list:**
 - Restart your MCP client after editing the config
 - Ensure Node.js >= 18 is installed: `node --version`
-- Try running directly: `npx -y @tinify-ai/mcp-server@latest` (should start without errors)
+- Try running directly: `npx -y @glassypic/mcp-server@latest` (should start without errors)
 
 **"Insufficient credits" error:**
 - Use the `status` tool to check remaining credits
@@ -391,7 +391,7 @@ Tools: optimize_image, login, logout, status, upgrade
 - Disable SEO tags (`output_seo_tag_gen: false`) to reduce cost to 3 credits/image
 
 **Login browser window doesn't open:**
-- Open this URL manually: `https://tinify.ai/mcp/authorize` and enter the code shown in the terminal
+- Open this URL manually: `https://glassypic.com/mcp/authorize` and enter the code shown in the terminal
 - Ensure a browser is installed and accessible
 
 **Session token issues:**

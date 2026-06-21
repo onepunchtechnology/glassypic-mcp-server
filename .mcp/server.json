@@ -1,23 +1,23 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.onepunchtechnology/tinify-ai",
-  "version": "1.4.3",
-  "description": "MCP server for Tinify image optimization — one tool, max optimization",
+  "name": "io.github.onepunchtechnology/glassypic",
+  "version": "2.0.0",
+  "description": "MCP server for GlassyPic — optimize, resize, upscale, and tag images in Claude",
   "repository": {
-    "url": "https://github.com/onepunchtechnology/tinify-ai-mcp-server",
+    "url": "https://github.com/onepunchtechnology/glassypic-mcp-server",
     "source": "github"
   },
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://app.tinify.ai/mcp"
+      "url": "https://app.glassypic.com/mcp"
     }
   ],
   "packages": [
     {
       "registryType": "npm",
-      "identifier": "@tinify-ai/mcp-server",
-      "version": "1.4.3",
+      "identifier": "@glassypic/mcp-server",
+      "version": "2.0.0",
       "transport": {
         "type": "stdio"
       }

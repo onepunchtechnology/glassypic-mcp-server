@@ -1,10 +1,10 @@
 {
-  "name": "@tinify-ai/mcp-server",
-  "version": "1.4.3",
-  "description": "MCP server for Tinify image optimization — one tool, max optimization",
+  "name": "@glassypic/mcp-server",
+  "version": "2.0.0",
+  "description": "MCP server for GlassyPic — optimize, resize, upscale, and tag images in Claude",
   "type": "module",
   "bin": {
-    "tinify-ai-mcp-server": "dist/index.js",
+    "glassypic-mcp-server": "dist/index.js",
     "mcp-server": "dist/index.js"
   },
   "main": "dist/index.js",
@@ -34,13 +34,13 @@
     "webp",
     "ai-image",
     "claude",
-    "tinify"
+    "glassypic"
   ],
-  "mcpName": "io.github.onepunchtechnology/tinify-ai",
+  "mcpName": "io.github.onepunchtechnology/glassypic",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/onepunchtechnology/tinify-ai-mcp-server"
+    "url": "https://github.com/onepunchtechnology/glassypic-mcp-server"
   },
   "publishConfig": {
     "access": "public"
