@@ -12,19 +12,47 @@ interface SessionData {
 export class SessionManager {
   public readonly sessionDir: string;
   private readonly sessionFile: string;
+  // Legacy ~/.tinify/session.json. Read-only fallback so users logged in before
+  // the GlassyPic rename are not silently logged out. Only active in default mode
+  // (null when a custom sessionDir is injected, e.g. tests).
+  private readonly legacySessionFile: string | null;
 
   constructor(sessionDir?: string) {
-    this.sessionDir = sessionDir ?? path.join(os.homedir(), ".tinify");
+    this.sessionDir = sessionDir ?? path.join(os.homedir(), ".glassypic");
     this.sessionFile = path.join(this.sessionDir, "session.json");
+    this.legacySessionFile = sessionDir
+      ? null
+      : path.join(os.homedir(), ".tinify", "session.json");
   }
 
-  private readData(): SessionData | null {
+  private parseFile(file: string): SessionData | null {
     try {
-      const raw = fs.readFileSync(this.sessionFile, "utf-8");
-      return JSON.parse(raw);
+      return JSON.parse(fs.readFileSync(file, "utf-8"));
     } catch {
       return null;
     }
+  }
+
+  private readData(): SessionData | null {
+    const current = this.parseFile(this.sessionFile);
+    if (current) return current;
+
+    // New file absent — migrate a legacy ~/.tinify session forward, once, so the
+    // rename doesn't log existing users out. After this, reads/writes use the new
+    // path and the old file is removed.
+    if (this.legacySessionFile) {
+      const legacy = this.parseFile(this.legacySessionFile);
+      if (legacy) {
+        this.writeData(legacy);
+        try {
+          fs.rmSync(this.legacySessionFile);
+        } catch {
+          // best effort — a leftover legacy file is harmless (new path now wins)
+        }
+        return legacy;
+      }
+    }
+    return null;
   }
 
   private writeData(data: SessionData): void {

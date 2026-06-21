@@ -22,7 +22,8 @@ import { SessionManager } from "../session/manager.js";
 /**
  * Returns auth headers for an API call.
  * In HTTP mode (request context present): uses per-request auth from context.
- * In stdio mode (no context): reads from ~/.tinify/session.json via SessionManager.
+ * In stdio mode (no context): reads from ~/.glassypic/session.json via SessionManager
+ * (falls back to the legacy ~/.tinify path for pre-rename logins).
  */
 export function getAuthHeaders(): Record<string, string> {
   // HTTP mode: context is set by the transport per request

@@ -160,7 +160,7 @@ export async function startHttpServer(createServer: () => McpServer): Promise<vo
   // Graceful shutdown
   const port = parseInt(process.env.PORT ?? "8080", 10);
   const httpServer = app.listen(port, () => {
-    console.error(`Tinify MCP server listening on port ${port} (HTTP mode)`);
+    console.error(`GlassyPic MCP server listening on port ${port} (HTTP mode)`);
   });
 
   const shutdown = () => {

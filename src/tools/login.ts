@@ -8,7 +8,7 @@ const POLL_TIMEOUT_MS = 5 * 60 * 1000;
 
 export async function loginTool(): Promise<string> {
   const sessionManager = new SessionManager();
-  const baseUrl = process.env.TINIFY_API_URL ?? DEFAULT_BASE_URL;
+  const baseUrl = process.env.GLASSYPIC_API_URL ?? process.env.TINIFY_API_URL ?? DEFAULT_BASE_URL;
 
   // If already logged in, return current status
   const existingToken = sessionManager.getMcpToken();
@@ -28,7 +28,7 @@ export async function loginTool(): Promise<string> {
   // Open browser
   const opened = openBrowser(authorizeUrl);
   const browserMsg = opened
-    ? `Opening browser... Complete login at tinify.ai.`
+    ? `Opening browser... Complete login at glassypic.com.`
     : `Open this URL to log in: ${authorizeUrl}`;
 
   // Poll for approval

@@ -1,6 +1,6 @@
 import { openBrowser } from "../utils/browser.js";
 
-const PRICING_URL = "https://tinify.ai/pricing";
+const PRICING_URL = "https://glassypic.com/pricing";
 
 export async function upgradeTool(): Promise<string> {
   const opened = openBrowser(PRICING_URL);

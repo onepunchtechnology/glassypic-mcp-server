@@ -4,7 +4,7 @@ import { revokeToken } from "../api/auth.js";
 
 export async function logoutTool(): Promise<string> {
   const sessionManager = new SessionManager();
-  const baseUrl = process.env.TINIFY_API_URL ?? DEFAULT_BASE_URL;
+  const baseUrl = process.env.GLASSYPIC_API_URL ?? process.env.TINIFY_API_URL ?? DEFAULT_BASE_URL;
 
   const mcpToken = sessionManager.getMcpToken();
   if (!mcpToken) {

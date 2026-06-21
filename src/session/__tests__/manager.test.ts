@@ -45,10 +45,76 @@ describe("SessionManager", () => {
     expect(manager.getToken()).toBeNull();
   });
 
-  it("uses ~/.tinify as default directory", () => {
+  it("uses ~/.glassypic as default directory", () => {
     const defaultManager = new SessionManager();
-    const expectedDir = path.join(os.homedir(), ".tinify");
+    const expectedDir = path.join(os.homedir(), ".glassypic");
     expect(defaultManager.sessionDir).toBe(expectedDir);
+  });
+});
+
+describe("legacy ~/.tinify migration (rename landmine)", () => {
+  let tmpHome: string;
+  let origHome: string | undefined;
+  let origUserProfile: string | undefined;
+
+  beforeEach(() => {
+    tmpHome = fs.mkdtempSync(path.join(os.tmpdir(), "glassypic-home-"));
+    // os.homedir() respects $HOME (POSIX) / %USERPROFILE% (Windows); point both at
+    // a temp home so the default-mode SessionManager resolves into it.
+    origHome = process.env.HOME;
+    origUserProfile = process.env.USERPROFILE;
+    process.env.HOME = tmpHome;
+    process.env.USERPROFILE = tmpHome;
+  });
+
+  afterEach(() => {
+    if (origHome === undefined) delete process.env.HOME;
+    else process.env.HOME = origHome;
+    if (origUserProfile === undefined) delete process.env.USERPROFILE;
+    else process.env.USERPROFILE = origUserProfile;
+    fs.rmSync(tmpHome, { recursive: true, force: true });
+  });
+
+  function writeLegacy(data: object) {
+    const dir = path.join(tmpHome, ".tinify");
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, "session.json"), JSON.stringify(data));
+  }
+
+  it("reads a legacy ~/.tinify session when ~/.glassypic does not exist", () => {
+    writeLegacy({ session_token: "legacy_guest", mcp_token: "mcp_legacy" });
+    const mgr = new SessionManager(); // default mode → ~/.glassypic + legacy fallback
+    expect(mgr.getToken()).toBe("legacy_guest");
+    expect(mgr.getMcpToken()).toBe("mcp_legacy");
+  });
+
+  it("migrates the legacy session into ~/.glassypic and removes the old file", () => {
+    writeLegacy({ session_token: "legacy_guest" });
+    const legacyFile = path.join(tmpHome, ".tinify", "session.json");
+
+    new SessionManager().getToken(); // first read triggers the one-time migration
+
+    expect(fs.existsSync(path.join(tmpHome, ".glassypic", "session.json"))).toBe(true);
+    expect(fs.existsSync(legacyFile)).toBe(false);
+  });
+
+  it("prefers ~/.glassypic over the legacy file when both exist", () => {
+    writeLegacy({ session_token: "legacy" });
+    const newDir = path.join(tmpHome, ".glassypic");
+    fs.mkdirSync(newDir, { recursive: true });
+    fs.writeFileSync(path.join(newDir, "session.json"), JSON.stringify({ session_token: "current" }));
+
+    expect(new SessionManager().getToken()).toBe("current");
+  });
+
+  it("does not use the legacy fallback when a custom sessionDir is injected", () => {
+    writeLegacy({ session_token: "legacy_guest" });
+    const customDir = fs.mkdtempSync(path.join(os.tmpdir(), "glassypic-custom-"));
+    try {
+      expect(new SessionManager(customDir).getToken()).toBeNull();
+    } finally {
+      fs.rmSync(customDir, { recursive: true, force: true });
+    }
   });
 });
 

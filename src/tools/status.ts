@@ -3,7 +3,7 @@ import { getAccountStatus } from "../api/auth.js";
 import { isX402Configured, getWalletAddress } from "../x402/client.js";
 
 export async function statusTool(): Promise<string> {
-  const baseUrl = process.env.TINIFY_API_URL ?? DEFAULT_BASE_URL;
+  const baseUrl = process.env.GLASSYPIC_API_URL ?? process.env.TINIFY_API_URL ?? DEFAULT_BASE_URL;
   const authHeaders = getAuthHeaders();
   const status = await getAccountStatus(baseUrl, authHeaders);
 

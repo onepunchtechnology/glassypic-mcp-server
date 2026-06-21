@@ -12,8 +12,8 @@ import { formatErrorForMcp } from "./errors.js";
 
 function createServer(): McpServer {
   const server = new McpServer({
-    name: "tinify",
-    version: "1.3.0",
+    name: "glassypic",
+    version: "2.0.0",
   });
 
 server.registerTool(
@@ -30,7 +30,7 @@ server.registerTool(
       input: z
         .string()
         .describe(
-          "Absolute local file path or remote URL of the image to optimize. Note: in remote/API mode, only remote URLs are supported (no local file paths). Supported inputs: JPG, PNG, WebP, AVIF, GIF (animated supported), HEIC, TIFF, BMP (max 50 MB). Tinify supports high-quality conversion between any input and output format.",
+          "Absolute local file path or remote URL of the image to optimize. Note: in remote/API mode, only remote URLs are supported (no local file paths). Supported inputs: JPG, PNG, WebP, AVIF, GIF (animated supported), HEIC, TIFF, BMP (max 50 MB). GlassyPic supports high-quality conversion between any input and output format.",
         ),
       output_path: z
         .string()
@@ -165,7 +165,7 @@ server.registerTool(
       {
         title: "Log In",
         description:
-          "Log in to your Tinify account via browser to unlock more credits. " +
+          "Log in to your GlassyPic account via browser to unlock more credits. " +
           "Opens a browser window where you complete login (Google, Facebook, or email). " +
           "After login, MCP automatically picks up your account with shared credits across web and MCP. " +
           "Free: 50 credits/day. Pro: 3,000/month. Max: 10,000/month.",
@@ -186,7 +186,7 @@ server.registerTool(
       {
         title: "Log Out",
         description:
-          "Log out of your Tinify account. Reverts to guest session (20 free credits/day). " +
+          "Log out of your GlassyPic account. Reverts to guest session (20 free credits/day). " +
           "Your web app account is not affected.",
         inputSchema: {},
       },
@@ -206,7 +206,7 @@ server.registerTool(
     {
       title: "Account Status",
       description:
-        "Check your Tinify account status: login state, tier, credits remaining, and credit reset time. " +
+        "Check your GlassyPic account status: login state, tier, credits remaining, and credit reset time. " +
         "Use this before batch processing to verify sufficient credits.",
       inputSchema: {},
     },
@@ -225,7 +225,7 @@ server.registerTool(
     {
       title: "Upgrade Plan",
       description:
-        "Open the Tinify pricing page in your browser to upgrade your plan for more credits. " +
+        "Open the GlassyPic pricing page in your browser to upgrade your plan for more credits. " +
         "Plans: Free (50/day), Pro (3,000/month), Max (10,000/month).",
       inputSchema: {},
     },

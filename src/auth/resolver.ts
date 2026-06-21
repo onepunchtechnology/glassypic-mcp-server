@@ -6,7 +6,7 @@ const anonStore = new AnonymousSessionStore();
 
 /**
  * Given an Authorization header value and session ID from an HTTP request,
- * returns the auth headers to forward to api.tinify.ai.
+ * returns the auth headers to forward to api.glassypic.com.
  *
  * Priority:
  *   1. Bearer mcp_... → pass through as-is (existing mcp_tokens)
