@@ -1,7 +1,7 @@
 {
   "name": "@glassypic/mcp-server",
-  "version": "2.0.0",
-  "description": "MCP server for GlassyPic — optimize, resize, upscale, and tag images in Claude",
+  "version": "2.0.1",
+  "description": "GlassyPic MCP server transforms raw images into production-ready assets in one workflow: upscale, resize, crop, compress, convert file formats, and generate SEO-friendly filenames and alt text",
   "type": "module",
   "bin": {
     "glassypic-mcp-server": "dist/index.js",

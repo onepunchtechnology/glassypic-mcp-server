@@ -2,9 +2,9 @@
   "manifest_version": "0.3",
   "name": "glassypic",
   "display_name": "GlassyPic",
-  "version": "2.0.0",
-  "description": "AI-powered image optimization — compress, resize, upscale, and generate SEO tags. One tool, all formats.",
-  "long_description": "GlassyPic optimizes images using AI-powered compression (typically 60-80% size reduction), with optional resize, upscale, format conversion, and SEO metadata generation. Supports JPEG, PNG, WebP, HEIC, GIF, AVIF, TIFF, and BMP. Free to use with 20 credits/day as a guest — no signup required.",
+  "version": "2.0.1",
+  "description": "AI image processing: upscale, resize, crop, compress, convert, and generate SEO metadata",
+  "long_description": "One tool that turns raw images into production-ready assets using AI-powered algorithm and multi-step agents (typically 60-80% size reduction), with optional resize, upscale, format conversion, and SEO metadata generation. Supports JPEG, PNG, WebP, HEIC, GIF, AVIF, TIFF, and BMP. Accepts absolute local file paths or remote URLs as input.",
   "author": {
     "name": "onepunchtechnology",
     "url": "https://github.com/onepunchtechnology"
@@ -41,7 +41,7 @@
   "tools": [
     {
       "name": "optimize_image",
-      "description": "Compress, resize, upscale, convert format, and generate SEO tags for an image. Accepts local file paths or URLs."
+      "description": "Compress, resize, upscale, convert format, generate SEO-optimized filename and alt text for an image. Accepts local file paths or URLs."
     },
     {
       "name": "login",

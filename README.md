@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-brightgreen.svg)](https://modelcontextprotocol.io)
 
-MCP server for [GlassyPic](https://glassypic.com) image optimization. AI-powered upscaling, resizing/cropping, compression, and SEO filename & alt text generation — all in one tool.
+MCP server for [GlassyPic](https://glassypic.com). One tool that turns raw images into production-ready assets. Support upscaling, resizing/cropping, compression, file format conversion, and SEO filename & alt text generation. Just describe the outcome you want in natrual language.
 
 ## Quick Start
 
@@ -142,14 +142,14 @@ args = ["-y", "@glassypic/mcp-server@latest"]
 
 ## Tool: `optimize_image`
 
-Optimizes an image with smart lossy compression (typically 60-80% size reduction), optional resize/upscale/format conversion, and AI-generated SEO metadata. Accepts absolute local file paths or remote URLs.
+One tool that turns raw images into production-ready assets using AI-powered algorithm and multi-step agents (typically 60-80% size reduction), with optional resize, upscale, format conversion, and SEO metadata generation. Supports JPEG, PNG, WebP, HEIC, GIF, AVIF, TIFF, and BMP. Accepts absolute local file paths or remote URLs.
 
 ### Parameters
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | `input` | string | Yes | — | Absolute local file path or remote URL |
-| `output_path` | string | No | auto | File path or directory (ending in `/`). If omitted: saves next to original with SEO slug or `.tinified` suffix |
+| `output_path` | string | No | auto | File path or directory (ending in `/`). If omitted: saves next to original with SEO slug or `.glassypic` suffix |
 | `output_format` | string | No | original | `jpg`, `png`, `webp`, `avif`, `gif`, or `original` |
 | `output_width_px` | int | No | — | Target width in pixels |
 | `output_height_px` | int | No | — | Target height in pixels |
@@ -300,7 +300,7 @@ Local file or URL
     → AI SEO tag generation (alt text, keywords, filename)
     → Optional: resize, upscale, format conversion
   → Download optimized file
-    → Save with SEO filename slug (or .tinified suffix if SEO disabled)
+    → Save with SEO filename slug (or .glassypic suffix if SEO disabled)
 ```
 
 All processing happens server-side via the [GlassyPic API](https://api.glassypic.com). The MCP server is a thin client that orchestrates the pipeline.
@@ -314,7 +314,7 @@ All processing happens server-side via the [GlassyPic API](https://api.glassypic
 | Cost per image | 3 credits + 1 SEO | same | same | same |
 | Signup required | No | Free signup | Paid | Paid |
 
-Session data is stored locally at `~/.glassypic/session.json` and persists across invocations. (A session from a pre-rename install at `~/.tinify/session.json` is migrated forward automatically on first run.)
+Session data is stored locally at `~/.glassypic/session.json` and persists across invocations. 
 
 ## Account & Credits
 
