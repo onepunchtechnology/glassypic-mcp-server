@@ -314,7 +314,7 @@ All processing happens server-side via the [GlassyPic API](https://api.glassypic
 | Cost per image | 3 credits + 1 SEO | same | same | same |
 | Signup required | No | Free signup | Paid | Paid |
 
-Session data is stored locally at `~/.tinify/session.json` and persists across invocations.
+Session data is stored locally at `~/.glassypic/session.json` and persists across invocations. (A session from a pre-rename install at `~/.tinify/session.json` is migrated forward automatically on first run.)
 
 ## Account & Credits
 
@@ -395,7 +395,7 @@ Tools: optimize_image, login, logout, status, upgrade
 - Ensure a browser is installed and accessible
 
 **Session token issues:**
-- Session data is stored at `~/.tinify/session.json`
+- Session data is stored at `~/.glassypic/session.json`
 - Delete this file to reset and start fresh
 - Use `logout` then `login` to re-authenticate
 

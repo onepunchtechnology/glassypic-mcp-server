@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Functional test for @tinify-ai/mcp-server as an anonymous user
+// Functional test for @glassypic/mcp-server as an anonymous user
 // Tests the real API — consumes live credits
 
 import { spawn } from "node:child_process";
@@ -129,19 +129,25 @@ async function test(label, fn) {
 function assert(cond, msg) { if (!cond) throw new Error(msg ?? "assertion failed"); }
 
 // ── Setup ─────────────────────────────────────────────────────────────────────
-const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "tinify-live-"));
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "glassypic-live-"));
 const inputPng = path.join(tmpDir, "test.png");
 fs.writeFileSync(inputPng, TINY_PNG);
 
-// Wipe session so tests run as a fresh anonymous user
-const sessionFile = path.join(os.homedir(), ".tinify", "session.json");
+// Wipe the session so tests run as a fresh anonymous user — NOT as a logged-in
+// developer, which would spend real paid credits. SessionManager migrates the
+// legacy ~/.tinify file forward to ~/.glassypic on read, so BOTH must be cleared
+// or the migrated token gets picked up.
+const sessionFile = path.join(os.homedir(), ".glassypic", "session.json");
+const legacySessionFile = path.join(os.homedir(), ".tinify", "session.json");
 let savedSession = null;
-if (fs.existsSync(sessionFile)) {
-  savedSession = fs.readFileSync(sessionFile, "utf-8");
-  fs.unlinkSync(sessionFile);
+for (const f of [sessionFile, legacySessionFile]) {
+  if (fs.existsSync(f)) {
+    if (savedSession === null) savedSession = fs.readFileSync(f, "utf-8");
+    fs.unlinkSync(f);
+  }
 }
 
-console.log(bold("\n@tinify-ai/mcp-server — live functional tests (anonymous user)\n"));
+console.log(bold("\n@glassypic/mcp-server — live functional tests (anonymous user)\n"));
 
 const client = new MCPClient();
 client.start();
@@ -154,11 +160,11 @@ try {
   await test("initialize handshake succeeds", async () => {
     initResult = await client.initialize();
     assert(initResult.protocolVersion, "no protocolVersion");
-    assert(initResult.serverInfo?.name === "tinify", `unexpected serverInfo.name: ${initResult.serverInfo?.name}`);
+    assert(initResult.serverInfo?.name === "glassypic", `unexpected serverInfo.name: ${initResult.serverInfo?.name}`);
   });
 
   await test("server info reports correct name and version", async () => {
-    assert(initResult.serverInfo.name === "tinify");
+    assert(initResult.serverInfo.name === "glassypic");
     assert(initResult.serverInfo.version, "no version");
     console.log(dim(`\n       serverInfo: ${JSON.stringify(initResult.serverInfo)}`));
   });
@@ -217,7 +223,7 @@ try {
     console.log(dim(`\n       size: ${sc.output_size_bytes} bytes, format: ${sc.output_format}, compression: ${sc.compression_ratio}`));
   });
 
-  await test("session token was saved to ~/.tinify/session.json", async () => {
+  await test("session token was saved to ~/.glassypic/session.json", async () => {
     assert(fs.existsSync(sessionFile), "session file not created");
     const data = JSON.parse(fs.readFileSync(sessionFile, "utf-8"));
     assert(data.session_token, "session_token missing from file");

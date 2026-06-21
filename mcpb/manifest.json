@@ -45,11 +45,11 @@
     },
     {
       "name": "login",
-      "description": "Log in to your Tinify account via browser to unlock more credits."
+      "description": "Log in to your GlassyPic account via browser to unlock more credits."
     },
     {
       "name": "logout",
-      "description": "Log out of your Tinify account."
+      "description": "Log out of your GlassyPic account."
     },
     {
       "name": "status",
@@ -57,7 +57,7 @@
     },
     {
       "name": "upgrade",
-      "description": "Open the Tinify pricing page to upgrade your plan."
+      "description": "Open the GlassyPic pricing page to upgrade your plan."
     }
   ],
   "compatibility": {
