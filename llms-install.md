@@ -1,4 +1,4 @@
-# Installing @tinify-ai/mcp-server
+# Installing @glassypic/mcp-server
 
 ## Quick Setup
 
@@ -7,9 +7,9 @@ Add the following to your MCP client configuration:
 ```json
 {
   "mcpServers": {
-    "tinify": {
+    "glassypic": {
       "command": "npx",
-      "args": ["-y", "@tinify-ai/mcp-server@latest"]
+      "args": ["-y", "@glassypic/mcp-server@latest"]
     }
   }
 }
@@ -22,31 +22,31 @@ No API key or signup required. Works out of the box with 20 free daily credits.
 | Client | Config Path |
 |--------|------------|
 | Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows) |
-| Claude Code | `~/.claude/settings.json` or run `claude mcp add tinify -- npx @tinify-ai/mcp-server` |
+| Claude Code | `~/.claude/settings.json` or run `claude mcp add glassypic -- npx @glassypic/mcp-server` |
 | Cline | MCP settings in Cline UI (Settings → MCP Servers → Add) |
 | Cursor | `.cursor/mcp.json` in your project root |
 | Windsurf | `~/.codeium/windsurf/mcp_config.json` |
-| OpenAI Codex CLI | `codex mcp add tinify -- npx -y @tinify-ai/mcp-server@latest` or `~/.codex/config.toml` |
-| Gemini CLI | `gemini mcp add --transport stdio tinify npx -y @tinify-ai/mcp-server@latest` or `~/.gemini/settings.json` |
+| OpenAI Codex CLI | `codex mcp add glassypic -- npx -y @glassypic/mcp-server@latest` or `~/.codex/config.toml` |
+| Gemini CLI | `gemini mcp add --transport stdio glassypic npx -y @glassypic/mcp-server@latest` or `~/.gemini/settings.json` |
 
 ### OpenAI Codex CLI
 
 ```bash
-codex mcp add tinify -- npx -y @tinify-ai/mcp-server@latest
+codex mcp add glassypic -- npx -y @glassypic/mcp-server@latest
 ```
 
 Or add manually to `~/.codex/config.toml`:
 
 ```toml
-[mcp_servers.tinify]
+[mcp_servers.glassypic]
 command = "npx"
-args = ["-y", "@tinify-ai/mcp-server@latest"]
+args = ["-y", "@glassypic/mcp-server@latest"]
 ```
 
 ### Gemini CLI
 
 ```bash
-gemini mcp add --transport stdio tinify npx -y @tinify-ai/mcp-server@latest
+gemini mcp add --transport stdio glassypic npx -y @glassypic/mcp-server@latest
 ```
 
 Or add manually to `~/.gemini/settings.json` (global) or `.gemini/settings.json` in your project root:
@@ -54,9 +54,9 @@ Or add manually to `~/.gemini/settings.json` (global) or `.gemini/settings.json`
 ```json
 {
   "mcpServers": {
-    "tinify": {
+    "glassypic": {
       "command": "npx",
-      "args": ["-y", "@tinify-ai/mcp-server@latest"]
+      "args": ["-y", "@glassypic/mcp-server@latest"]
     }
   }
 }
@@ -91,7 +91,7 @@ The server exposes an `optimize_image` tool plus four account management tools.
 Base cost per image: 3 credits (compression) + 1 if SEO tags enabled + 1 if resize + 2 if AI upscale.
 Animated GIFs: per-frame cost × number of frames processed (up to gif_frame_limit, default 100).
 Guest tier: 20 credits/day. Free account: 50/day. Pro: 3,000/month. Max: 10,000/month.
-Need more? Use the `upgrade` tool or visit https://tinify.ai/pricing
+Need more? Use the `upgrade` tool or visit https://glassypic.com/pricing
 
 ## Account Management
 

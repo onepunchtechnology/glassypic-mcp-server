@@ -159,7 +159,7 @@ try {
 
   await test("server info reports correct name and version", async () => {
     assert(initResult.serverInfo.name === "glassypic");
-    assert(initResult.serverInfo.version, "no version");
+    assert(initResult.serverInfo.version === "2.0.0", `unexpected version: ${initResult.serverInfo.version}`);
     console.log(dim(`\n       serverInfo: ${JSON.stringify(initResult.serverInfo)}`));
   });
 
