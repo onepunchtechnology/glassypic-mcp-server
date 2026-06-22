@@ -85,6 +85,11 @@ Edit `~/.codeium/windsurf/mcp_config.json`:
 </details>
 
 <details>
+<summary><strong>Smithery</strong></summary>
+Install via Smithery: [![smithery badge](https://smithery.ai/badge/glassypic/mcp-server)](https://smithery.ai/servers/glassypic/mcp-server)
+</details>
+
+<details>
 <summary><strong>Cline</strong></summary>
 
 Open Cline settings → MCP Servers → Add, then paste:
