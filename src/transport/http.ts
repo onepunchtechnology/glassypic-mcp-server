@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import { randomUUID } from "node:crypto";
+import { createRequire } from "node:module";
+const _require = createRequire(import.meta.url);
+const SERVER_VERSION: string = (_require("../../package.json") as { version: string }).version;
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { resolveAuthHeaders } from "../auth/resolver.js";
@@ -61,7 +64,7 @@ export async function startHttpServer(createServer: () => McpServer): Promise<vo
   // Static MCP server card — allows Smithery to scan tools without auth
   app.get("/.well-known/mcp/server-card.json", (_req, res) => {
     res.json({
-      serverInfo: { name: "glassypic", version: process.env.npm_package_version ?? "2.0.0" },
+      serverInfo: { name: "glassypic", version: SERVER_VERSION },
       authentication: { schemes: ["bearer"], required: false },
     });
   });
