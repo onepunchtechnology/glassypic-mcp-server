@@ -23,6 +23,21 @@ Add to your MCP client config:
 
 No signup required. Works out of the box with 20 free daily credits.
 
+> **Windows users:** If the server doesn't appear after editing a JSON config, your client likely can't resolve `npx` from PATH (a common, silent failure). Wrap the command with `cmd /c`:
+>
+> ```json
+> {
+>   "mcpServers": {
+>     "glassypic": {
+>       "command": "cmd",
+>       "args": ["/c", "npx", "-y", "@glassypic/mcp-server@latest"]
+>     }
+>   }
+> }
+> ```
+>
+> This applies to the hand-edited JSON configs below (Claude Desktop, Cursor, Windsurf, Cline). The CLI commands (Claude Code, Gemini CLI, Codex CLI) are unaffected.
+
 ### Client-Specific Setup
 
 <details>
@@ -388,6 +403,7 @@ Tools: optimize_image, login, logout, status, upgrade
 - Restart your MCP client after editing the config
 - Ensure Node.js >= 18 is installed: `node --version`
 - Try running directly: `npx -y @glassypic/mcp-server@latest` (should start without errors)
+- **On Windows:** if the server silently never loads, wrap the command with `cmd /c` (`"command": "cmd"`, `"args": ["/c", "npx", "-y", "@glassypic/mcp-server@latest"]`) — see the Windows note under [Quick Start](#quick-start)
 
 **"Insufficient credits" error:**
 - Use the `status` tool to check remaining credits
