@@ -18,6 +18,7 @@ interface ProcessParams {
   tempFileIds: string[];
   settings: ProcessingSettings;
   authHeaders: Record<string, string>;
+  idempotencyKey?: string;
 }
 
 interface JobInfo {
@@ -34,12 +35,15 @@ export interface ProcessResult {
 }
 
 export async function triggerProcessing(params: ProcessParams): Promise<ProcessResult> {
-  const { baseUrl, tempFileIds, settings, authHeaders } = params;
+  const { baseUrl, tempFileIds, settings, authHeaders, idempotencyKey } = params;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...authHeaders,
   };
+  if (idempotencyKey) {
+    headers["X-Slack-Idempotency-Key"] = idempotencyKey;
+  }
 
   // Use x402-wrapped fetch if available (auto-handles 402 payment signing)
   const x402Fetch = await getX402Fetch();
@@ -71,6 +75,7 @@ export async function triggerProcessing(params: ProcessParams): Promise<ProcessR
           `Or use \`login\` to access subscription credits.`,
           402,
           body.detail,
+          body,
         );
       }
 
@@ -81,6 +86,7 @@ export async function triggerProcessing(params: ProcessParams): Promise<ProcessR
         `Wallet: ${walletAddr}`,
         402,
         body.detail,
+        body,
       );
     }
 
@@ -92,6 +98,7 @@ export async function triggerProcessing(params: ProcessParams): Promise<ProcessR
           `Use the login tool to sign in, or wait until credits reset.`,
           429,
           body.detail,
+          body,
         );
       } else if (body.tier) {
         throw new ApiError(
@@ -99,6 +106,7 @@ export async function triggerProcessing(params: ProcessParams): Promise<ProcessR
           `Upgrade for more credits, or wait until they reset.`,
           429,
           body.detail,
+          body,
         );
       } else {
         // Fallback for old backend format
@@ -107,10 +115,11 @@ export async function triggerProcessing(params: ProcessParams): Promise<ProcessR
           `Insufficient credits. ${remaining} credits remaining.`,
           429,
           body.detail,
+          body,
         );
       }
     }
-    throw new ApiError(body.detail || "Processing failed", response.status, body.detail);
+    throw new ApiError(body.detail || "Processing failed", response.status, body.detail, body);
   }
 
   return response.json();

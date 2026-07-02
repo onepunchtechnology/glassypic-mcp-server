@@ -75,6 +75,28 @@ describe("triggerProcessing", () => {
     expect(headers["X-Session-Token"]).toBe("my-session-token");
   });
 
+  it("omits X-Slack-Idempotency-Key when no idempotency key is provided", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        success: true,
+        jobs: [{ id: "job-1", temp_file_id: "temp-1", status: "queued" }],
+        credits_used: 4,
+        credits_remaining: 16,
+      }),
+    });
+
+    await triggerProcessing({
+      baseUrl: "https://api.tinify.ai",
+      tempFileIds: ["temp-1"],
+      settings: {},
+      authHeaders: { "X-Session-Token": "my-session-token" },
+    });
+
+    const headers = mockFetch.mock.calls[0][1].headers;
+    expect(headers["X-Slack-Idempotency-Key"]).toBeUndefined();
+  });
+
   it("does not include X-Session-Token header when sessionToken is null", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,

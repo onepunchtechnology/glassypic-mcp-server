@@ -17,7 +17,7 @@ export function resolveInput(input: string): ReturnType<typeof resolveInputUtil>
   return resolveInputUtil(input);
 }
 import { resolveUniqueOutputPath } from "../utils/output.js";
-import { DEFAULT_BASE_URL, getAuthHeaders } from "../api/client.js";
+import { DEFAULT_BASE_URL, buildAuthHeaders } from "../api/client.js";
 import { SessionManager } from "../session/manager.js";
 
 export interface OptimizeImageParams {
@@ -33,6 +33,8 @@ export interface OptimizeImageParams {
   confirm_gif_cost?: boolean;
   gif_frame_limit?: number;
   _gif_temp_file_id?: string;
+  authToken?: string;
+  idempotencyKey?: string;
   baseUrl?: string;
   timeoutMs?: number;
 }
@@ -56,7 +58,7 @@ export async function optimizeImage(
   const baseUrl = params.baseUrl ?? DEFAULT_BASE_URL;
 
   // 1. Resolve input and upload
-  const authHeaders = getAuthHeaders() ?? {};
+  const authHeaders = buildAuthHeaders(params.authToken);
   let uploadResult: Awaited<ReturnType<typeof uploadFile>>;
   let inputFilename: string;
   let inputIsUrl: boolean;
@@ -175,6 +177,7 @@ export async function optimizeImage(
     tempFileIds: [uploadResult.temp_file_id],
     settings,
     authHeaders,
+    idempotencyKey: params.idempotencyKey,
   });
 
   const job = processResult.jobs[0];

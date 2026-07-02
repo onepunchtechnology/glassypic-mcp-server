@@ -1,16 +1,36 @@
 #!/usr/bin/env node
 
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import * as z from "zod";
+import { formatErrorForMcp } from "./errors.js";
 import { optimizeImage } from "./tools/optimize.js";
 import { loginTool } from "./tools/login.js";
 import { logoutTool } from "./tools/logout.js";
 import { statusTool } from "./tools/status.js";
 import { upgradeTool } from "./tools/upgrade.js";
-import { formatErrorForMcp } from "./errors.js";
 
-function createServer(): McpServer {
+export { optimizeBuffer } from "./tools/optimizeBuffer.js";
+export type { OptimizeBufferParams, OptimizeBufferResult } from "./tools/optimizeBuffer.js";
+
+function comparablePath(filePath: string): string {
+  const resolvedPath = path.resolve(filePath);
+  try {
+    return fs.realpathSync(resolvedPath);
+  } catch {
+    return resolvedPath;
+  }
+}
+
+export function isDirectEntrypoint(argvPath: string | undefined, modulePath: string): boolean {
+  if (argvPath === undefined) return false;
+  return comparablePath(argvPath) === comparablePath(modulePath);
+}
+
+export function createServer(): McpServer {
   const server = new McpServer({
     name: "glassypic",
     version: "2.0.1",
@@ -242,11 +262,15 @@ server.registerTool(
   return server;
 }
 
-if (process.env.MCP_TRANSPORT === "http") {
-  const { startHttpServer } = await import("./transport/http.js");
-  await startHttpServer(createServer);
-} else {
-  const server = createServer();
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
+const isDirectRun = isDirectEntrypoint(process.argv[1], fileURLToPath(import.meta.url));
+
+if (isDirectRun) {
+  if (process.env.MCP_TRANSPORT === "http") {
+    const { startHttpServer } = await import("./transport/http.js");
+    await startHttpServer(createServer);
+  } else {
+    const server = createServer();
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+  }
 }

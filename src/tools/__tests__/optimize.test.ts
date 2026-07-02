@@ -145,6 +145,43 @@ describe("optimizeImage", () => {
     expect(processCall.settings.output_seo_tag_gen).toBe(false);
   });
 
+  it("uses the injected auth token for upload, processing, and stdio download", async () => {
+    vi.mocked(uploadFile).mockResolvedValueOnce({
+      temp_file_id: "temp-1",
+      original_filename: "hero.png",
+      file_size: 50000,
+      mime_type: "image/png",
+      session_token: null,
+    });
+    vi.mocked(triggerProcessing).mockResolvedValueOnce({
+      success: true,
+      jobs: [{ id: "job-1", temp_file_id: "temp-1", status: "queued" }],
+      credits_used: 4,
+      credits_remaining: 16,
+    });
+    vi.mocked(waitForCompletion).mockResolvedValueOnce({
+      job_id: "job-1",
+      status: "completed",
+      processed_size: 30000,
+      processed_format: "png",
+    });
+    vi.mocked(downloadFile).mockResolvedValueOnce({
+      buffer: Buffer.from("data"),
+      filename: "hero.png",
+    });
+
+    await optimizeImage({
+      input: path.join(tmpDir, "hero.png"),
+      baseUrl: "https://api.tinify.ai",
+      authToken: "guest_workspace_1",
+    });
+
+    const expectedAuthHeaders = { "X-Session-Token": "guest_workspace_1" };
+    expect(vi.mocked(uploadFile).mock.calls[0][0].authHeaders).toEqual(expectedAuthHeaders);
+    expect(vi.mocked(triggerProcessing).mock.calls[0][0].authHeaders).toEqual(expectedAuthHeaders);
+    expect(vi.mocked(downloadFile).mock.calls[0][0].authHeaders).toEqual(expectedAuthHeaders);
+  });
+
   describe("URL input", () => {
     it("uses uploadUrl for URL inputs instead of uploadFile", async () => {
       vi.mocked(uploadUrl).mockResolvedValueOnce({

@@ -1,3 +1,6 @@
+import { getRequestAuthHeaders } from "../auth/context.js";
+import { SessionManager } from "../session/manager.js";
+
 export interface ClientConfig {
   baseUrl: string;
   sessionToken: string | null;
@@ -10,14 +13,12 @@ export class ApiError extends Error {
     message: string,
     public readonly status: number,
     public readonly detail?: string,
+    public readonly body?: unknown,
   ) {
     super(message);
     this.name = "ApiError";
   }
 }
-
-import { getRequestAuthHeaders } from "../auth/context.js";
-import { SessionManager } from "../session/manager.js";
 
 /**
  * Returns auth headers for an API call.
@@ -32,4 +33,15 @@ export function getAuthHeaders(): Record<string, string> {
 
   // stdio mode: read from local session file
   return new SessionManager().getAuthHeaders();
+}
+
+export function buildAuthHeaders(token?: string): Record<string, string> {
+  if (token !== undefined) {
+    const normalizedToken = token.trim();
+    if (normalizedToken.length === 0) {
+      throw new ApiError("Explicit auth token must not be blank.", 400);
+    }
+    return { "X-Session-Token": normalizedToken };
+  }
+  return getAuthHeaders();
 }

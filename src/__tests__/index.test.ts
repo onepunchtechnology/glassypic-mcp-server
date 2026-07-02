@@ -1,3 +1,6 @@
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
 import { describe, it, expect, vi, beforeAll, afterEach } from "vitest";
 
 // Mock MCP SDK before importing index (vi.mock is hoisted)
@@ -37,7 +40,8 @@ describe("optimize_image tool handler (index.ts)", () => {
     };
     vi.mocked(McpServer).mockImplementation(() => mockServerInstance as any);
 
-    await import("../index.js");
+    const { createServer } = await import("../index.js");
+    createServer();
 
     handler = mockServerInstance.registerTool.mock.calls[0]?.[2];
   });
@@ -158,5 +162,39 @@ describe("optimize_image tool handler (index.ts)", () => {
     const result = await handler({ input: "/Users/me/hero.png" });
 
     expect(result.content[0].text).not.toContain("Dimensions:");
+  });
+});
+
+describe("direct-run guard", () => {
+  it("treats a package bin symlink to the module as direct", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "glassypic-bin-"));
+    try {
+      const modulePath = path.join(tmpDir, "dist", "index.js");
+      fs.mkdirSync(path.dirname(modulePath), { recursive: true });
+      fs.writeFileSync(modulePath, "");
+
+      const binDir = path.join(tmpDir, "node_modules", ".bin");
+      fs.mkdirSync(binDir, { recursive: true });
+      const binPath = path.join(binDir, "glassypic-mcp-server");
+      fs.symlinkSync(modulePath, binPath);
+
+      const { isDirectEntrypoint } = await import("../index.js");
+
+      expect(isDirectEntrypoint(binPath, modulePath)).toBe(true);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("does not throw when argv path cannot be realpath resolved", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "glassypic-bin-"));
+    try {
+      const missingPath = path.join(tmpDir, "missing", "index.js");
+      const { isDirectEntrypoint } = await import("../index.js");
+
+      expect(isDirectEntrypoint(missingPath, path.resolve(missingPath))).toBe(true);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 });
