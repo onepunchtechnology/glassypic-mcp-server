@@ -56,7 +56,7 @@ export async function optimizeImage(
   const baseUrl = params.baseUrl ?? DEFAULT_BASE_URL;
 
   // 1. Resolve input and upload
-  const authHeaders = getAuthHeaders();
+  const authHeaders = getAuthHeaders() ?? {};
   let uploadResult: Awaited<ReturnType<typeof uploadFile>>;
   let inputFilename: string;
   let inputIsUrl: boolean;
@@ -206,7 +206,7 @@ export async function optimizeImage(
   }
 
   // stdio mode: download to local disk (existing code)
-  const downloadResult = await downloadFile({ baseUrl, jobId: job.id });
+  const downloadResult = await downloadFile({ baseUrl, jobId: job.id, authHeaders });
 
   // 7. Resolve output path and save
   const outputPath = resolveUniqueOutputPath({

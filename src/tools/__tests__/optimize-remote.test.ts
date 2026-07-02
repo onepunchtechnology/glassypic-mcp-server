@@ -10,7 +10,7 @@ vi.mock("../../session/manager.js", () => ({
 }));
 vi.mock("../../api/client.js", async (importOriginal) => {
   const original = await importOriginal<typeof import("../../api/client.js")>();
-  return { ...original, getAuthHeaders: vi.fn().mockReturnValue({}) };
+  return { ...original, getAuthHeaders: vi.fn() };
 });
 
 describe("optimize_image in remote mode", () => {
@@ -50,10 +50,12 @@ describe("optimize_image in remote mode", () => {
   });
 
   it("returns download URL instead of local path in HTTP mode", async () => {
+    const { getAuthHeaders } = await import("../../api/client.js");
     const { uploadUrl } = await import("../../api/upload.js");
     const { triggerProcessing } = await import("../../api/process.js");
     const { waitForCompletion } = await import("../../api/status.js");
 
+    vi.mocked(getAuthHeaders).mockReturnValueOnce(undefined as unknown as Record<string, string>);
     vi.mocked(uploadUrl).mockResolvedValueOnce({
       temp_file_id: "temp-1",
       original_filename: "photo.jpg",

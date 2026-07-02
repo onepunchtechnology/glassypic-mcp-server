@@ -3,6 +3,7 @@ import { ApiError } from "./client.js";
 interface DownloadParams {
   baseUrl: string;
   jobId: string;
+  authHeaders?: Record<string, string>;
 }
 
 interface DownloadResult {
@@ -11,9 +12,11 @@ interface DownloadResult {
 }
 
 export async function downloadFile(params: DownloadParams): Promise<DownloadResult> {
-  const { baseUrl, jobId } = params;
+  const { baseUrl, jobId, authHeaders = {} } = params;
 
-  const response = await fetch(`${baseUrl}/download/${jobId}`);
+  const response = await fetch(`${baseUrl}/download/${jobId}`, {
+    headers: authHeaders,
+  });
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));

@@ -28,6 +28,24 @@ describe("downloadFile", () => {
     expect(result.filename).toBe("hero.tinified.webp");
   });
 
+  it("sends auth headers when provided", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      headers: new Headers(),
+      arrayBuffer: async () => new ArrayBuffer(1),
+    });
+
+    await downloadFile({
+      baseUrl: "https://api.tinify.ai",
+      jobId: "job-1",
+      authHeaders: { "X-Session-Token": "guest-token" },
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith("https://api.tinify.ai/download/job-1", {
+      headers: { "X-Session-Token": "guest-token" },
+    });
+  });
+
   it("throws on expired job (410)", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
