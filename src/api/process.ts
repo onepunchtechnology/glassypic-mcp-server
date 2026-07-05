@@ -94,7 +94,7 @@ export async function triggerProcessing(params: ProcessParams): Promise<ProcessR
       if (body.is_guest) {
         throw new ApiError(
           `You've used all ${body.credits_limit || 20} free daily credits. ` +
-          `Log in for more credits (free = 50/day, Pro = 3,000/month). ` +
+          `Log in for more credits (free = 30/day, Pro = 3,300/month). ` +
           `Use the login tool to sign in, or wait until credits reset.`,
           429,
           body.detail,

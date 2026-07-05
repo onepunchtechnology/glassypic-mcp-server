@@ -188,7 +188,7 @@ server.registerTool(
           "Log in to your GlassyPic account via browser to unlock more credits. " +
           "Opens a browser window where you complete login (Google, Facebook, or email). " +
           "After login, MCP automatically picks up your account with shared credits across web and MCP. " +
-          "Free: 50 credits/day. Pro: 3,000/month. Max: 10,000/month.",
+          "Free: 30 credits/day. Pro: 3,300/month. Max: 12,000/month.",
         inputSchema: {},
       },
       async () => {
@@ -246,7 +246,7 @@ server.registerTool(
       title: "Upgrade Plan",
       description:
         "Open the GlassyPic pricing page in your browser to upgrade your plan for more credits. " +
-        "Plans: Free (50/day), Pro (3,000/month), Max (10,000/month).",
+        "Plans: Free (30/day), Pro (3,300/month), Max (12,000/month).",
       inputSchema: {},
     },
     async () => {

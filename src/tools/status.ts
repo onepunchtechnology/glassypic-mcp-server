@@ -27,7 +27,7 @@ export async function statusTool(): Promise<string> {
     "Not logged in. Using guest session.",
     `Credits: ${status.credits_remaining} of ${status.credits_limit} remaining (resets daily)`,
     x402Status,
-    "Tip: Log in for more credits \u2014 free accounts get 50/day.",
+    "Tip: Log in for more credits \u2014 free accounts get 30/day.",
   ].join("\n");
 }
 
