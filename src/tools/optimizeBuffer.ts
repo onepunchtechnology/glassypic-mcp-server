@@ -7,10 +7,11 @@ export interface OptimizeBufferParams {
   bytes: Buffer;
   filename: string;
   mimetype: string;
-  output_width_px: number;
-  output_height_px: number;
+  output_width_px?: number;
+  output_height_px?: number;
   output_resize_behavior: "pad" | "crop";
   output_seo_tag_gen?: boolean;
+  output_format?: "original" | "jpg" | "png" | "webp" | "avif" | "gif" | "svg" | "ico";
   authToken: string;
   idempotencyKey: string;
   baseUrl: string;
@@ -20,6 +21,8 @@ export interface OptimizeBufferParams {
 export interface OptimizeBufferResult {
   bytes: Buffer;
   seo_alt_text: string | null;
+  seo_filename: string | null;
+  processed_format: string | null;
   output_width_px: number | null;
   output_height_px: number | null;
   output_size_bytes: number;
@@ -45,6 +48,7 @@ export async function optimizeBuffer(params: OptimizeBufferParams): Promise<Opti
       output_height: params.output_height_px,
       output_resize_behavior: params.output_resize_behavior,
       output_seo_tag_gen: params.output_seo_tag_gen ?? true,
+      output_format: params.output_format ?? "original",
     },
   });
 
@@ -75,6 +79,8 @@ export async function optimizeBuffer(params: OptimizeBufferParams): Promise<Opti
   return {
     bytes: Buffer.from(await downloadResponse.arrayBuffer()),
     seo_alt_text: completedJob.seo_alt_text ?? null,
+    seo_filename: completedJob.seo_filename ?? null,
+    processed_format: completedJob.processed_format ?? null,
     output_width_px: completedJob.processed_width ?? null,
     output_height_px: completedJob.processed_height ?? null,
     output_size_bytes: completedJob.processed_size ?? 0,

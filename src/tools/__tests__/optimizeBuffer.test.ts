@@ -83,6 +83,64 @@ describe("optimizeBuffer", () => {
     expect(call.authHeaders["X-Session-Token"]).toBe("guest_1");
   });
 
+  it("passes the requested output_format through and returns the ACTUAL processed_format", async () => {
+    vi.mocked(triggerProcessing).mockResolvedValue({
+      success: true,
+      jobs: [{ id: "j1", temp_file_id: "t1", status: "queued" }],
+      credits_used: 5,
+      credits_remaining: 95,
+    });
+    vi.mocked(waitForCompletion).mockResolvedValue({
+      job_id: "j1",
+      status: "completed",
+      processed_width: 1080,
+      processed_height: 1920,
+      processed_size: 400000,
+      processed_format: "png",
+      seo_filename: "a-logo",
+    });
+    fetchMock.mockResolvedValue(new Response(new Uint8Array([9, 9, 9]), { status: 200 }));
+
+    const out = await optimizeBuffer({
+      bytes: Buffer.from([1, 2, 3]),
+      filename: "logo.png",
+      mimetype: "image/png",
+      output_width_px: 1080,
+      output_height_px: 1920,
+      output_resize_behavior: "crop",
+      output_format: "png",
+      authToken: "guest_1",
+      idempotencyKey: "k",
+      baseUrl: "https://api.test",
+    });
+
+    const call = vi.mocked(triggerProcessing).mock.calls[0][0];
+    expect(call.settings.output_format).toBe("png");
+    expect(out.processed_format).toBe("png");
+    expect(out.seo_filename).toBe("a-logo");
+  });
+
+  it("defaults output_format to 'original' when the caller doesn't specify one", async () => {
+    vi.mocked(triggerProcessing).mockResolvedValue({
+      success: true,
+      jobs: [{ id: "j1", temp_file_id: "t1", status: "queued" }],
+      credits_used: 5,
+      credits_remaining: 95,
+    });
+    vi.mocked(waitForCompletion).mockResolvedValue({
+      job_id: "j1", status: "completed", processed_size: 1000, processed_format: "jpg",
+    });
+    fetchMock.mockResolvedValue(new Response(new Uint8Array([1]), { status: 200 }));
+
+    await optimizeBuffer({
+      bytes: Buffer.from([1]), filename: "c.png", mimetype: "image/png",
+      output_width_px: 1200, output_height_px: 630, output_resize_behavior: "pad",
+      authToken: "t", idempotencyKey: "k", baseUrl: "https://api.test",
+    });
+
+    expect(vi.mocked(triggerProcessing).mock.calls[0][0].settings.output_format).toBe("original");
+  });
+
   it("rejects a blank tenant auth token before using ambient credentials", async () => {
     const sessionDir = path.join(tmpHome, ".glassypic");
     fs.mkdirSync(sessionDir, { recursive: true });
