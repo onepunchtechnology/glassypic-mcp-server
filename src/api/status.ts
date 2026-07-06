@@ -10,6 +10,8 @@ export interface CompletedJob {
   processed_width?: number | null;
   processed_height?: number | null;
   processed_compression_ratio?: number | null;
+  original_width?: number | null;
+  original_height?: number | null;
   seo_alt_text?: string | null;
   seo_filename?: string | null;
   seo_keywords?: string[] | null;

@@ -25,6 +25,8 @@ export interface OptimizeBufferResult {
   processed_format: string | null;
   output_width_px: number | null;
   output_height_px: number | null;
+  original_width_px: number | null;
+  original_height_px: number | null;
   output_size_bytes: number;
 }
 
@@ -83,6 +85,8 @@ export async function optimizeBuffer(params: OptimizeBufferParams): Promise<Opti
     processed_format: completedJob.processed_format ?? null,
     output_width_px: completedJob.processed_width ?? null,
     output_height_px: completedJob.processed_height ?? null,
+    original_width_px: completedJob.original_width ?? null,
+    original_height_px: completedJob.original_height ?? null,
     output_size_bytes: completedJob.processed_size ?? 0,
   };
 }
