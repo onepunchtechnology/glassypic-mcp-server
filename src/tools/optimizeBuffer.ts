@@ -63,6 +63,7 @@ export async function optimizeBuffer(params: OptimizeBufferParams): Promise<Opti
     baseUrl: params.baseUrl,
     jobId: job.id,
     timeoutMs: params.timeoutMs,
+    headers: authHeaders,
   });
 
   const downloadResponse = await fetch(`${params.baseUrl}/download/${job.id}`, {

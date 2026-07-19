@@ -2,6 +2,32 @@ import { describe, it, expect, vi } from "vitest";
 import { waitForCompletion, type CompletedJob } from "../status.js";
 
 describe("waitForCompletion", () => {
+  it("passes auth headers to the stream via the eventsource fetch option", async () => {
+    const ctor = vi.fn(() => ({ addEventListener: vi.fn(), close: vi.fn() }));
+    vi.stubGlobal("EventSource", ctor);
+    const realFetch = vi.fn(async () => new Response(null));
+    vi.stubGlobal("fetch", realFetch);
+
+    waitForCompletion({
+      baseUrl: "https://api.tinify.ai",
+      jobId: "job-1",
+      timeoutMs: 60000,
+      headers: { Authorization: "Bearer mcp_abc" },
+    });
+
+    // Second constructor arg carries a fetch that injects the auth headers.
+    const options = ctor.mock.calls[0][1] as { fetch?: Function } | undefined;
+    expect(options?.fetch).toBeInstanceOf(Function);
+    await options!.fetch!("https://api.tinify.ai/status/job-1/stream", {
+      headers: { Accept: "text/event-stream" },
+    });
+    const passedInit = realFetch.mock.calls[0][1] as { headers: Record<string, string> };
+    expect(passedInit.headers).toMatchObject({
+      Accept: "text/event-stream",
+      Authorization: "Bearer mcp_abc",
+    });
+  });
+
   it("resolves with job data on complete event", async () => {
     const listeners: Record<string, (event: any) => void> = {};
     const mockEventSource = {
@@ -152,8 +178,10 @@ describe("waitForCompletion", () => {
       timeoutMs: 60000,
     });
 
+    // Second arg is the eventsource options (undefined when no auth headers).
     expect(MockESConstructor).toHaveBeenCalledWith(
-      "https://api.tinify.ai/status/job-abc/stream"
+      "https://api.tinify.ai/status/job-abc/stream",
+      undefined
     );
   });
 

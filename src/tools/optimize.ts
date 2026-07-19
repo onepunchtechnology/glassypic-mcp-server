@@ -185,11 +185,12 @@ export async function optimizeImage(
     throw new Error("No job created by the server.");
   }
 
-  // 5. Wait for completion via SSE
+  // 5. Wait for completion via SSE (actor-scoped — send auth headers)
   const completedJob = await waitForCompletion({
     baseUrl,
     jobId: job.id,
     timeoutMs: params.timeoutMs ?? 60000,
+    headers: authHeaders,
   });
 
   // 6. In HTTP mode: return download URL (no local disk write)
