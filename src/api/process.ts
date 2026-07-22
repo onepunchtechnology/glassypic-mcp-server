@@ -25,6 +25,8 @@ interface JobInfo {
   id: string;
   temp_file_id: string;
   status: string;
+  /** Server auto-triggered AI upscale for this job (target > source). */
+  auto_upscale?: boolean;
 }
 
 export interface ProcessResult {

@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { uploadFile, uploadUrl } from "../api/upload.js";
 import { triggerProcessing, type ProcessingSettings } from "../api/process.js";
-import { waitForCompletion } from "../api/status.js";
+import { waitForCompletion, STANDARD_TIMEOUT_MS, UPSCALE_TIMEOUT_MS } from "../api/status.js";
 import { downloadFile } from "../api/download.js";
 import { resolveInput as resolveInputUtil, isUrl, extractFilenameFromUrl } from "../utils/input.js";
 
@@ -189,10 +189,14 @@ export async function optimizeImage(
   }
 
   // 5. Wait for completion via SSE (actor-scoped — send auth headers)
+  // Pipeline-aware budget: a job may execute upscale either because the
+  // caller explicitly requested it, or because the server auto-triggered it
+  // (target > source) — job.auto_upscale reports the latter after the fact.
+  const isUpscaleClass = params.output_upscale_factor !== undefined || job.auto_upscale === true;
   const completedJob = await waitForCompletion({
     baseUrl,
     jobId: job.id,
-    timeoutMs: params.timeoutMs ?? 60000,
+    timeoutMs: params.timeoutMs ?? (isUpscaleClass ? UPSCALE_TIMEOUT_MS : STANDARD_TIMEOUT_MS),
     headers: authHeaders,
   });
 

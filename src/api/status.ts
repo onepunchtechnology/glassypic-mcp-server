@@ -1,6 +1,16 @@
 import { ApiError } from "./client.js";
 import { EventSource as EventSourcePoly } from "eventsource";
 
+/** Default SSE wait budget for non-upscale jobs. */
+export const STANDARD_TIMEOUT_MS = 60_000;
+/**
+ * Extended SSE wait budget for jobs that may execute upscale. Upscale p95 is
+ * measured at 62.2s — the standard 60s budget would time out a still-running
+ * job and report it as failed (latency spec Phase 0 instrument prerequisite,
+ * mirrors the equivalent web-client fix).
+ */
+export const UPSCALE_TIMEOUT_MS = 120_000;
+
 export interface CompletedJob {
   job_id: string;
   status: "completed" | "failed" | "expired";
@@ -31,7 +41,7 @@ interface StatusParams {
 }
 
 export function waitForCompletion(params: StatusParams): Promise<CompletedJob> {
-  const { baseUrl, jobId, timeoutMs = 60000, headers } = params;
+  const { baseUrl, jobId, timeoutMs = STANDARD_TIMEOUT_MS, headers } = params;
 
   const timeoutSecs = Math.round(timeoutMs / 1000);
 

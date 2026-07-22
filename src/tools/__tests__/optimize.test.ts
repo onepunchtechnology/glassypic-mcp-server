@@ -13,6 +13,8 @@ vi.mock("../../api/process.js", () => ({
 }));
 vi.mock("../../api/status.js", () => ({
   waitForCompletion: vi.fn(),
+  STANDARD_TIMEOUT_MS: 60000,
+  UPSCALE_TIMEOUT_MS: 120000,
 }));
 vi.mock("../../api/download.js", () => ({
   downloadFile: vi.fn(),
@@ -99,6 +101,73 @@ describe("optimizeImage", () => {
     // Verify file was written
     expect(fs.existsSync(result.output_path)).toBe(true);
     expect(fs.readFileSync(result.output_path, "utf-8")).toBe("optimized-png");
+  });
+
+  describe("pipeline-aware SSE timeout (upscale p95 is 62.2s)", () => {
+    function mockHappyPath(jobOverrides: Partial<{ auto_upscale: boolean }> = {}) {
+      vi.mocked(uploadFile).mockResolvedValueOnce({
+        temp_file_id: "temp-1",
+        original_filename: "hero.png",
+        file_size: 50000,
+        mime_type: "image/png",
+        session_token: null,
+      });
+      vi.mocked(triggerProcessing).mockResolvedValueOnce({
+        success: true,
+        jobs: [{ id: "job-1", temp_file_id: "temp-1", status: "queued", ...jobOverrides }],
+        credits_used: 4,
+        credits_remaining: 16,
+      });
+      vi.mocked(waitForCompletion).mockResolvedValueOnce({
+        job_id: "job-1",
+        status: "completed",
+        processed_size: 30000,
+        processed_format: "png",
+      });
+      vi.mocked(downloadFile).mockResolvedValueOnce({
+        buffer: Buffer.from("data"),
+        filename: "hero.png",
+      });
+    }
+
+    it("uses the extended budget for an explicit upscale request", async () => {
+      mockHappyPath();
+      await optimizeImage({
+        input: path.join(tmpDir, "hero.png"),
+        baseUrl: "https://api.tinify.ai",
+        output_upscale_factor: 2,
+      });
+      expect(vi.mocked(waitForCompletion).mock.calls[0][0].timeoutMs).toBe(120000);
+    });
+
+    it("uses the extended budget when the server auto-triggered upscale", async () => {
+      mockHappyPath({ auto_upscale: true });
+      await optimizeImage({
+        input: path.join(tmpDir, "hero.png"),
+        baseUrl: "https://api.tinify.ai",
+        output_width_px: 4000, // no explicit upscale factor — server decided
+      });
+      expect(vi.mocked(waitForCompletion).mock.calls[0][0].timeoutMs).toBe(120000);
+    });
+
+    it("uses the standard budget for a non-upscale job", async () => {
+      mockHappyPath();
+      await optimizeImage({
+        input: path.join(tmpDir, "hero.png"),
+        baseUrl: "https://api.tinify.ai",
+      });
+      expect(vi.mocked(waitForCompletion).mock.calls[0][0].timeoutMs).toBe(60000);
+    });
+
+    it("an explicit timeoutMs always wins over the pipeline-aware default", async () => {
+      mockHappyPath({ auto_upscale: true });
+      await optimizeImage({
+        input: path.join(tmpDir, "hero.png"),
+        baseUrl: "https://api.tinify.ai",
+        timeoutMs: 5000,
+      });
+      expect(vi.mocked(waitForCompletion).mock.calls[0][0].timeoutMs).toBe(5000);
+    });
   });
 
   it("passes settings through to processing", async () => {

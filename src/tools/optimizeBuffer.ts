@@ -1,7 +1,7 @@
 import { buildAuthHeaders, ApiError } from "../api/client.js";
 import { uploadBuffer } from "../api/uploadBuffer.js";
 import { triggerProcessing } from "../api/process.js";
-import { waitForCompletion } from "../api/status.js";
+import { waitForCompletion, STANDARD_TIMEOUT_MS, UPSCALE_TIMEOUT_MS } from "../api/status.js";
 
 export interface OptimizeBufferParams {
   bytes: Buffer;
@@ -59,10 +59,13 @@ export async function optimizeBuffer(params: OptimizeBufferParams): Promise<Opti
     throw new ApiError("No job created by the server.", 500);
   }
 
+  // Pipeline-aware budget: optimizeBuffer never sends an explicit upscale
+  // factor, but the server may still auto-trigger upscale (target > source).
+  const isUpscaleClass = job.auto_upscale === true;
   const completedJob = await waitForCompletion({
     baseUrl: params.baseUrl,
     jobId: job.id,
-    timeoutMs: params.timeoutMs,
+    timeoutMs: params.timeoutMs ?? (isUpscaleClass ? UPSCALE_TIMEOUT_MS : STANDARD_TIMEOUT_MS),
     headers: authHeaders,
   });
 

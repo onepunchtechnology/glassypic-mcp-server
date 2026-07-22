@@ -3,7 +3,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 // Mock API modules to avoid real HTTP calls in the download URL test
 vi.mock("../../api/upload.js", () => ({ uploadFile: vi.fn(), uploadUrl: vi.fn() }));
 vi.mock("../../api/process.js", () => ({ triggerProcessing: vi.fn() }));
-vi.mock("../../api/status.js", () => ({ waitForCompletion: vi.fn() }));
+vi.mock("../../api/status.js", () => ({
+  waitForCompletion: vi.fn(),
+  STANDARD_TIMEOUT_MS: 60000,
+  UPSCALE_TIMEOUT_MS: 120000,
+}));
 vi.mock("../../api/download.js", () => ({ downloadFile: vi.fn() }));
 vi.mock("../../session/manager.js", () => ({
   SessionManager: vi.fn(() => ({ getAuthHeaders: vi.fn().mockReturnValue({}), saveToken: vi.fn() })),

@@ -11,6 +11,8 @@ vi.mock("../../api/process.js", () => ({
 }));
 vi.mock("../../api/status.js", () => ({
   waitForCompletion: vi.fn(),
+  STANDARD_TIMEOUT_MS: 60000,
+  UPSCALE_TIMEOUT_MS: 120000,
 }));
 
 import { ApiError } from "../../api/client.js";
@@ -81,6 +83,96 @@ describe("optimizeBuffer", () => {
     const call = vi.mocked(triggerProcessing).mock.calls[0][0];
     expect(call.idempotencyKey).toBe("slack:T1:trig1:instagram_story");
     expect(call.authHeaders["X-Session-Token"]).toBe("guest_1");
+  });
+
+  describe("pipeline-aware SSE timeout (upscale p95 is 62.2s)", () => {
+    it("uses the extended budget when the server auto-triggered upscale", async () => {
+      vi.mocked(triggerProcessing).mockResolvedValue({
+        success: true,
+        jobs: [{ id: "j1", temp_file_id: "t1", status: "queued", auto_upscale: true }],
+        credits_used: 5,
+        credits_remaining: 95,
+      });
+      vi.mocked(waitForCompletion).mockResolvedValue({
+        job_id: "j1",
+        status: "completed",
+        processed_size: 400000,
+      });
+      fetchMock.mockResolvedValue(new Response(new Uint8Array([9]), { status: 200 }));
+
+      await optimizeBuffer({
+        bytes: Buffer.from([1, 2, 3]),
+        filename: "cat.png",
+        mimetype: "image/png",
+        output_width_px: 4000,
+        output_height_px: 4000,
+        output_resize_behavior: "crop",
+        authToken: "guest_1",
+        idempotencyKey: "k1",
+        baseUrl: "https://api.test",
+      });
+
+      expect(vi.mocked(waitForCompletion).mock.calls[0][0].timeoutMs).toBe(120000);
+    });
+
+    it("uses the standard budget for a non-upscale job", async () => {
+      vi.mocked(triggerProcessing).mockResolvedValue({
+        success: true,
+        jobs: [{ id: "j1", temp_file_id: "t1", status: "queued" }],
+        credits_used: 5,
+        credits_remaining: 95,
+      });
+      vi.mocked(waitForCompletion).mockResolvedValue({
+        job_id: "j1",
+        status: "completed",
+        processed_size: 400000,
+      });
+      fetchMock.mockResolvedValue(new Response(new Uint8Array([9]), { status: 200 }));
+
+      await optimizeBuffer({
+        bytes: Buffer.from([1, 2, 3]),
+        filename: "cat.png",
+        mimetype: "image/png",
+        output_width_px: 200,
+        output_height_px: 200,
+        output_resize_behavior: "crop",
+        authToken: "guest_1",
+        idempotencyKey: "k2",
+        baseUrl: "https://api.test",
+      });
+
+      expect(vi.mocked(waitForCompletion).mock.calls[0][0].timeoutMs).toBe(60000);
+    });
+
+    it("an explicit timeoutMs always wins over the pipeline-aware default", async () => {
+      vi.mocked(triggerProcessing).mockResolvedValue({
+        success: true,
+        jobs: [{ id: "j1", temp_file_id: "t1", status: "queued", auto_upscale: true }],
+        credits_used: 5,
+        credits_remaining: 95,
+      });
+      vi.mocked(waitForCompletion).mockResolvedValue({
+        job_id: "j1",
+        status: "completed",
+        processed_size: 400000,
+      });
+      fetchMock.mockResolvedValue(new Response(new Uint8Array([9]), { status: 200 }));
+
+      await optimizeBuffer({
+        bytes: Buffer.from([1, 2, 3]),
+        filename: "cat.png",
+        mimetype: "image/png",
+        output_width_px: 4000,
+        output_height_px: 4000,
+        output_resize_behavior: "crop",
+        authToken: "guest_1",
+        idempotencyKey: "k3",
+        baseUrl: "https://api.test",
+        timeoutMs: 9000,
+      });
+
+      expect(vi.mocked(waitForCompletion).mock.calls[0][0].timeoutMs).toBe(9000);
+    });
   });
 
   it("returns the original (source) dimensions alongside the processed ones", async () => {
