@@ -58,7 +58,7 @@ export async function optimizeImage(
   const baseUrl = params.baseUrl ?? DEFAULT_BASE_URL;
 
   // 1. Resolve input and upload
-  const authHeaders = buildAuthHeaders(params.authToken);
+  let authHeaders = buildAuthHeaders(params.authToken);
   let uploadResult: Awaited<ReturnType<typeof uploadFile>>;
   let inputFilename: string;
   let inputIsUrl: boolean;
@@ -86,10 +86,6 @@ export async function optimizeImage(
       filename: inputFilename,
       authHeaders,
     });
-
-    if (uploadResult.session_token && process.env.MCP_TRANSPORT !== "http") {
-      new SessionManager().saveToken(uploadResult.session_token);
-    }
   } else {
     // Local file: read bytes and upload
     const input = await resolveInput(params.input);
@@ -101,10 +97,17 @@ export async function optimizeImage(
       filename: input.filename,
       authHeaders,
     });
+  }
 
-    if (uploadResult.session_token && process.env.MCP_TRANSPORT !== "http") {
-      new SessionManager().saveToken(uploadResult.session_token);
-    }
+  // If the upload minted a fresh guest session, persist it AND rebuild
+  // authHeaders from it before any further call. The pre-upload snapshot
+  // above is correct for the upload itself (a first-run guest has no session
+  // yet) but is stale for everything after — process/status/download are all
+  // actor-scoped, so reusing an empty/old header here 403s a first-run guest
+  // out of their own job (regression fixed 2026-07-22).
+  if (uploadResult.session_token && process.env.MCP_TRANSPORT !== "http") {
+    new SessionManager().saveToken(uploadResult.session_token);
+    authHeaders = buildAuthHeaders(params.authToken);
   }
 
   // Check if animated GIF needs cost confirmation

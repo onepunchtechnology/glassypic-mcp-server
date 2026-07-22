@@ -182,6 +182,69 @@ describe("optimizeImage", () => {
     expect(vi.mocked(downloadFile).mock.calls[0][0].authHeaders).toEqual(expectedAuthHeaders);
   });
 
+  it("a first-run guest (no explicit authToken) can process/wait/download after upload mints a session (regression)", async () => {
+    // Stateful SessionManager double: getAuthHeaders() reflects whatever the
+    // most recent saveToken() call wrote, mirroring the real local session
+    // file — a first-run guest starts with NO token (empty headers) and only
+    // gets one once the upload response returns it.
+    let savedToken: string | null = null;
+    vi.mocked(SessionManager).mockImplementation(
+      () =>
+        ({
+          sessionDir: "/tmp/.tinify",
+          getAuthHeaders: vi.fn(() =>
+            savedToken ? { "X-Session-Token": savedToken } : {}
+          ),
+          saveToken: vi.fn((token: string) => {
+            savedToken = token;
+          }),
+        }) as any
+    );
+
+    vi.mocked(uploadFile).mockResolvedValueOnce({
+      temp_file_id: "temp-1",
+      original_filename: "hero.png",
+      file_size: 50000,
+      mime_type: "image/png",
+      session_token: "fresh-guest-session",
+    });
+    vi.mocked(triggerProcessing).mockResolvedValueOnce({
+      success: true,
+      jobs: [{ id: "job-1", temp_file_id: "temp-1", status: "queued" }],
+      credits_used: 4,
+      credits_remaining: 16,
+    });
+    vi.mocked(waitForCompletion).mockResolvedValueOnce({
+      job_id: "job-1",
+      status: "completed",
+      processed_size: 30000,
+      processed_format: "png",
+    });
+    vi.mocked(downloadFile).mockResolvedValueOnce({
+      buffer: Buffer.from("data"),
+      filename: "hero.png",
+    });
+
+    // No authToken param — the exact first-run guest path.
+    await optimizeImage({
+      input: path.join(tmpDir, "hero.png"),
+      baseUrl: "https://api.tinify.ai",
+    });
+
+    const expectedHeaders = { "X-Session-Token": "fresh-guest-session" };
+    // Upload itself necessarily goes out unauthenticated (no session exists
+    // yet) — the bug is everything AFTER upload reusing that stale snapshot.
+    expect(vi.mocked(triggerProcessing).mock.calls[0][0].authHeaders).toEqual(
+      expectedHeaders
+    );
+    expect(vi.mocked(waitForCompletion).mock.calls[0][0].headers).toEqual(
+      expectedHeaders
+    );
+    expect(vi.mocked(downloadFile).mock.calls[0][0].authHeaders).toEqual(
+      expectedHeaders
+    );
+  });
+
   describe("URL input", () => {
     it("uses uploadUrl for URL inputs instead of uploadFile", async () => {
       vi.mocked(uploadUrl).mockResolvedValueOnce({
@@ -249,15 +312,21 @@ describe("optimizeImage", () => {
   });
 
   it("persists session token returned from upload", async () => {
-    let capturedSaveToken: ReturnType<typeof vi.fn> | undefined;
-    vi.mocked(SessionManager).mockImplementation(() => {
-      capturedSaveToken = vi.fn();
-      return {
-        sessionDir: "/tmp/.tinify",
-        getAuthHeaders: vi.fn().mockReturnValue({}),
-        saveToken: capturedSaveToken,
-      } as any;
-    });
+    // Stable mock shared across every `new SessionManager()` construction —
+    // the real thing is backed by one local session file, so every
+    // instantiation must observe the same saveToken calls, not a fresh
+    // capture each time (the code legitimately constructs it more than once:
+    // once to save the token, again via getAuthHeaders() when headers are
+    // rebuilt after upload).
+    const capturedSaveToken = vi.fn();
+    vi.mocked(SessionManager).mockImplementation(
+      () =>
+        ({
+          sessionDir: "/tmp/.tinify",
+          getAuthHeaders: vi.fn().mockReturnValue({}),
+          saveToken: capturedSaveToken,
+        }) as any
+    );
 
     vi.mocked(uploadFile).mockResolvedValueOnce({
       temp_file_id: "temp-1",
