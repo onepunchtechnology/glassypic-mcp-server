@@ -33,7 +33,7 @@ export function isDirectEntrypoint(argvPath: string | undefined, modulePath: str
 export function createServer(): McpServer {
   const server = new McpServer({
     name: "glassypic",
-    version: "2.0.1",
+    version: "2.0.2",
   });
 
 server.registerTool(

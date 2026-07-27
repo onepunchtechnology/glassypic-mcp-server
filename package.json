@@ -1,6 +1,6 @@
 {
   "name": "@glassypic/mcp-server",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "GlassyPic MCP server transforms raw images into production-ready assets in one workflow: upscale, resize, crop, compress, convert file formats, and generate SEO-friendly filenames and alt text",
   "type": "module",
   "bin": {

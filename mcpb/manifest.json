@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "glassypic",
   "display_name": "GlassyPic",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "AI image processing: upscale, resize, crop, compress, convert, and generate SEO metadata",
   "long_description": "One tool that turns raw images into production-ready assets using AI-powered algorithm and multi-step agents (typically 60-80% size reduction), with optional resize, upscale, format conversion, and SEO metadata generation. Supports JPEG, PNG, WebP, HEIC, GIF, AVIF, TIFF, and BMP. Accepts absolute local file paths or remote URLs as input.",
   "author": {
