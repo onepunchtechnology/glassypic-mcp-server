@@ -5,8 +5,6 @@ const clearMcpTokenMock = vi.hoisted(() => vi.fn());
 const getAccountStatusMock = vi.hoisted(() => vi.fn());
 const revokeTokenMock = vi.hoisted(() => vi.fn());
 const getAuthHeadersMock = vi.hoisted(() => vi.fn());
-const isX402ConfiguredMock = vi.hoisted(() => vi.fn());
-const getWalletAddressMock = vi.hoisted(() => vi.fn());
 
 vi.mock("../../session/manager.js", () => ({
   SessionManager: vi.fn(() => ({
@@ -25,18 +23,12 @@ vi.mock("../../api/client.js", () => ({
   getAuthHeaders: getAuthHeadersMock,
 }));
 
-vi.mock("../../x402/client.js", () => ({
-  isX402Configured: isX402ConfiguredMock,
-  getWalletAddress: getWalletAddressMock,
-}));
-
 import { logoutTool } from "../logout.js";
 import { statusTool } from "../status.js";
 
 describe("logoutTool", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    isX402ConfiguredMock.mockReturnValue(false);
     getAuthHeadersMock.mockReturnValue({});
   });
 
@@ -74,7 +66,6 @@ describe("logoutTool", () => {
 describe("statusTool", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    isX402ConfiguredMock.mockReturnValue(false);
     getAuthHeadersMock.mockReturnValue({});
   });
 
@@ -106,34 +97,6 @@ describe("statusTool", () => {
 
     expect(result).toMatch(/not logged in/i);
     expect(result).toContain("20");
-  });
-
-  it("includes x402 wallet info when configured", async () => {
-    isX402ConfiguredMock.mockReturnValue(true);
-    getWalletAddressMock.mockResolvedValue("0xABCD1234");
-    getAccountStatusMock.mockResolvedValue({
-      logged_in: false,
-      credits_remaining: 20,
-      credits_limit: 20,
-    });
-
-    const result = await statusTool();
-
-    expect(result).toContain("Enabled");
-    expect(result).toContain("0xABCD1234");
-  });
-
-  it("shows x402 not configured message when not set", async () => {
-    isX402ConfiguredMock.mockReturnValue(false);
-    getAccountStatusMock.mockResolvedValue({
-      logged_in: false,
-      credits_remaining: 20,
-      credits_limit: 20,
-    });
-
-    const result = await statusTool();
-
-    expect(result).toContain("Not configured");
   });
 
   it("includes reset time when credits_reset_at is set", async () => {

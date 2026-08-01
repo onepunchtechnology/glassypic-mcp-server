@@ -1,12 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock x402 client before importing process module
-vi.mock("../../x402/client.js", () => ({
-  getX402Fetch: vi.fn(async () => null),
-  isX402Configured: vi.fn(() => false),
-  getWalletAddress: vi.fn(async () => null),
-}));
-
 import { triggerProcessing, type ProcessingSettings } from "../process.js";
 
 const mockFetch = vi.fn();
@@ -163,25 +156,39 @@ describe("triggerProcessing", () => {
     ).rejects.toThrow("Internal processing error");
   });
 
-  it("throws on 402 when x402 not configured", async () => {
-    mockFetch.mockResolvedValueOnce({
+  it("throws a credits-only message on 402", async () => {
+    mockFetch.mockResolvedValue({
       ok: false,
       status: 402,
-      headers: new Headers(),
-      json: async () => ({
-        detail: "Payment required",
-        x402: { price_usdc: "0.05", credits_needed: 5 },
-      }),
+      json: async () => ({ detail: "Payment required" }),
     });
 
     await expect(
       triggerProcessing({
-        baseUrl: "https://api.tinify.ai",
-        tempFileIds: ["temp-1"],
+        baseUrl: "https://api.glassypic.com",
+        tempFileIds: ["t1"],
         settings: {},
         authHeaders: {},
-      })
-    ).rejects.toThrow(/Insufficient credits/);
+      }),
+    ).rejects.toThrow(/insufficient credits/i);
+  });
+
+  it("402 message names no wallet, key, or cryptocurrency", async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 402,
+      json: async () => ({ detail: "Payment required" }),
+    });
+
+    const error = await triggerProcessing({
+      baseUrl: "https://api.glassypic.com",
+      tempFileIds: ["t1"],
+      settings: {},
+      authHeaders: {},
+    }).catch((e) => e as Error);
+
+    expect(error.message).not.toMatch(/wallet|private key|base network|crypto/i);
+    expect(error.message).toMatch(/login|upgrade/i);
   });
 
   it("throws on insufficient credits (429) with parsed details", async () => {
