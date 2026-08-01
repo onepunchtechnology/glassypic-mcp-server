@@ -41,11 +41,17 @@ describe("version consistency", () => {
     expect(readJson("mcpb/manifest.json").version).toBe(expected);
   });
 
-  it("mcpb/package.json matches", () => {
+  // Conditional: mcpb/package.json is a gitignored build input for the packed bundle
+  // (.gitignore:65), not a tracked source — absent from a fresh clone. Do not make this
+  // unconditional; CI and fresh clones don't have it.
+  it.skipIf(!exists("mcpb/package.json"))("mcpb/package.json matches", () => {
     expect(readJson("mcpb/package.json").version).toBe(expected);
   });
 
-  it("mcpb/package-lock.json matches in both places", () => {
+  // Conditional: mcpb/package-lock.json is a gitignored build input for the packed bundle
+  // (.gitignore:66), not a tracked source — absent from a fresh clone. Do not make this
+  // unconditional; CI and fresh clones don't have it.
+  it.skipIf(!exists("mcpb/package-lock.json"))("mcpb/package-lock.json matches in both places", () => {
     const lock = readJson("mcpb/package-lock.json");
     expect(lock.version).toBe(expected);
     expect(lock.packages[""].version).toBe(expected);
