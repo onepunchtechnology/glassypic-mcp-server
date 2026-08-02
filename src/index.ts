@@ -12,6 +12,7 @@ import { loginTool } from "./tools/login.js";
 import { logoutTool } from "./tools/logout.js";
 import { statusTool } from "./tools/status.js";
 import { upgradeTool } from "./tools/upgrade.js";
+import { costSummary, UPSCALE_COST_NOTE, RESIZE_COST_NOTE, SEO_COST_NOTE } from "./costs.js";
 
 export { optimizeBuffer } from "./tools/optimizeBuffer.js";
 export type { OptimizeBufferParams, OptimizeBufferResult } from "./tools/optimizeBuffer.js";
@@ -43,8 +44,7 @@ server.registerTool(
     description:
       "Optimize an image: smart lossy compression (typically 60-80% size reduction), optional resize/upscale/format conversion, and AI-generated SEO metadata. " +
       "Accepts absolute local file paths or remote URLs. In remote/API mode, only remote URLs are supported. Supported input formats: JPG, PNG, WebP, AVIF, GIF, SVG, ICO, HEIC, TIFF, BMP (max 50 MB). Supported output formats: JPG, PNG, WebP, AVIF, GIF, SVG, ICO. " +
-      "Each call costs 3 credits + 1 if SEO tags enabled. Animated GIFs are processed frame-by-frame (each frame optimized individually). " +
-      "Cost = frames × per-frame operations. Use confirm_gif_cost: true after reviewing the cost warning. " +
+      costSummary() + " " +
       "Free tier: 20 credits/day, no signup. Log in with the login tool for more credits. Use status tool to check remaining credits before batch processing.",
     inputSchema: {
       input: z
@@ -69,7 +69,8 @@ server.registerTool(
         .positive()
         .optional()
         .describe(
-          "Target width in pixels. Set only width for proportional resize. Set both width and height for exact output dimensions (see output_resize_behavior).",
+          "Target width in pixels. Set only width for proportional resize. Set both width and height for exact output dimensions (see output_resize_behavior). " +
+          RESIZE_COST_NOTE,
         ),
       output_height_px: z
         .number()
@@ -77,12 +78,16 @@ server.registerTool(
         .positive()
         .optional()
         .describe(
-          "Target height in pixels. Set only height for proportional resize. Set both width and height for exact output dimensions (see output_resize_behavior).",
+          "Target height in pixels. Set only height for proportional resize. Set both width and height for exact output dimensions (see output_resize_behavior). " +
+          RESIZE_COST_NOTE,
         ),
       output_upscale_factor: z
         .union([z.literal(2), z.literal(4)])
         .optional()
-        .describe("AI upscale factor: 2 (2×) or 4 (4×). Uses Real-ESRGAN for high-quality upscaling."),
+        .describe(
+          "AI upscale factor: 2 (2×) or 4 (4×). Uses Real-ESRGAN for high-quality upscaling. " +
+          UPSCALE_COST_NOTE,
+        ),
       output_resize_behavior: z
         .enum(["pad", "crop"])
         .optional()
@@ -94,7 +99,8 @@ server.registerTool(
         .boolean()
         .optional()
         .describe(
-          "Generate SEO metadata (alt text, keywords, filename) and rename output file to SEO slug. Costs 1 extra credit. Default: true.",
+          "Generate SEO metadata (alt text, keywords, filename) and rename output file to SEO slug. " +
+          SEO_COST_NOTE,
         ),
       output_file_size_limit: z
         .number()

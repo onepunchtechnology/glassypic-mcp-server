@@ -331,10 +331,31 @@ All processing happens server-side via the [GlassyPic API](https://api.glassypic
 |---|---|---|---|---|
 | Credits/day or month | 20/day | 50/day | 3,000/month | 10,000/month |
 | Images/day (default settings) | ~5 | ~12 | ~750 | ~2,500 |
-| Cost per image | 3 credits + 1 SEO | same | same | same |
+| Cost per image | 4 credits (compress + SEO tags, defaults) | same | same | same |
 | Signup required | No | Free signup | Paid | Paid |
 
 Session data is stored locally at `~/.glassypic/session.json` and persists across invocations. 
+
+### Automatic upscaling
+
+When a resize target exceeds the source image by more than 1.2×, GlassyPic
+automatically runs an AI upscale before resizing, so enlargements ship sharp
+instead of blurred. This happens without `output_upscale_factor` being set and
+**adds 2 credits**.
+
+A resize-only call therefore costs the same as a full pipeline when the source is
+smaller than the target:
+
+| Call | Credits |
+|---|---|
+| Compress only, no SEO tags | 3 |
+| Compress + SEO tags (defaults) | 4 |
+| Resize down + SEO tags | 5 |
+| Resize up past 1.2× + SEO tags | 7 |
+| Compress + resize + explicit upscale + tags | 7 |
+| SVG or ICO output | 1 (flat, overrides the above) |
+
+Animated GIFs are billed per frame — see the `confirm_gif_cost` parameter.
 
 ## Account & Credits
 
@@ -383,7 +404,8 @@ Paste this into your `CLAUDE.md` or system prompt to help agents use the tool ef
 Tools: optimize_image, login, logout, status, upgrade
 
 - Use status to check credits before batch processing
-- Each optimize_image call costs 3 credits + 1 if SEO enabled (default)
+- Credits: 3 to compress (always), +1 if width/height is set, +2 to upscale, +1 for SEO tags (default). A full pipeline is 7 credits. SVG/ICO output is a flat 1 credit.
+- Resizing up past 1.2x the source triggers an automatic AI upscale (+2 credits) even without output_upscale_factor set — a resize-only call on a small image can cost 7, not 5.
 - Guest: 20 credits/day. Free account: 50/day. Pro: 3,000/month.
 - Always use absolute file paths, not relative.
 - Set only width OR height for proportional resize. Set both for exact dimensions.
@@ -409,7 +431,7 @@ Tools: optimize_image, login, logout, status, upgrade
 - Use the `status` tool to check remaining credits
 - Use the `login` tool to sign in for more credits (free accounts get 50/day)
 - Use the `upgrade` tool to see paid plans (Pro: 3,000/month, Max: 10,000/month)
-- Disable SEO tags (`output_seo_tag_gen: false`) to reduce cost to 3 credits/image
+- Disable SEO tags (`output_seo_tag_gen: false`) to save 1 credit; note that resizing up past 1.2× the source still adds an automatic 2-credit upscale regardless
 
 **Login browser window doesn't open:**
 - Open this URL manually: `https://glassypic.com/mcp/authorize` and enter the code shown in the terminal
