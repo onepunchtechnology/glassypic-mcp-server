@@ -70,14 +70,19 @@ const LOOPBACK_HOSTNAMES = new Set(["localhost", "127.0.0.1", "[::1]"]);
  * Mirrors apps/slack/src/config.ts:14-26.
  */
 export function resolveApiBaseUrl(env: NodeJS.ProcessEnv = process.env): ApiBaseUrl {
+  const hasGlassypic = env.GLASSYPIC_API_URL !== undefined;
+  const hasTinify = env.TINIFY_API_URL !== undefined;
   const raw = env.GLASSYPIC_API_URL ?? env.TINIFY_API_URL ?? DEFAULT_BASE_URL;
+
+  // Determine which variable was actually used
+  const varName = hasGlassypic ? "GLASSYPIC_API_URL" : hasTinify ? "TINIFY_API_URL" : "GLASSYPIC_API_URL";
 
   let parsed: URL;
   try {
     parsed = new URL(raw);
   } catch {
     throw new Error(
-      `GLASSYPIC_API_URL must be a valid URL (https, or http for localhost). Received: ${raw}`,
+      `${varName} must be a valid URL (https, or http for localhost). Received: ${raw}`,
     );
   }
 
@@ -85,7 +90,7 @@ export function resolveApiBaseUrl(env: NodeJS.ProcessEnv = process.env): ApiBase
   const protocolOk = parsed.protocol === "https:" || (parsed.protocol === "http:" && isLoopback);
   if (!protocolOk) {
     throw new Error(
-      `GLASSYPIC_API_URL must be an https URL (http is allowed only for localhost). Received: ${raw}`,
+      `${varName} must be an https URL (http is allowed only for localhost). Received: ${raw}`,
     );
   }
 

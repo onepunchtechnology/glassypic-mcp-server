@@ -452,13 +452,15 @@ Tools: optimize_image, login, logout, status, upgrade
 
 ## Privacy Policy
 
-Full policy: **https://glassypic.com/privacy**
+Full policy: **https://glassypic.com/privacy/**
 
 **What is transmitted.** Images you optimize are uploaded to the GlassyPic API
 (`https://api.glassypic.com`) for processing, along with your authentication
 token. Images are retained according to your account tier and then deleted —
 both the original upload and the processed version. See the policy for the
 retention schedule.
+
+When you pass a remote URL to the tool, the GlassyPic API fetches it server-side; the URL itself is sent to GlassyPic, and the request to the image host originates from GlassyPic's servers rather than from your machine.
 
 **What is stored locally.** When you use the `login` tool, your access token and
 account email are written to `~/.glassypic/session.json` with file mode `0600`

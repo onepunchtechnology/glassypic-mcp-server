@@ -29,7 +29,7 @@
     "avif",
     "heic"
   ],
-  "privacy_policies": ["https://glassypic.com/privacy"],
+  "privacy_policies": ["https://glassypic.com/privacy/"],
   "server": {
     "type": "node",
     "entry_point": "server/index.js",

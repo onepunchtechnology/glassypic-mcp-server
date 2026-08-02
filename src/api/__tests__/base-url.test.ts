@@ -53,4 +53,19 @@ describe("resolveApiBaseUrl", () => {
       "https://api.glassypic.com",
     );
   });
+
+  it("names TINIFY_API_URL in error when only TINIFY_API_URL is bad", () => {
+    expect(() => resolveApiBaseUrl({ TINIFY_API_URL: "not-a-url" })).toThrow(
+      /TINIFY_API_URL/,
+    );
+  });
+
+  it("names GLASSYPIC_API_URL in error when it is bad, even if TINIFY_API_URL is also set", () => {
+    expect(() =>
+      resolveApiBaseUrl({
+        GLASSYPIC_API_URL: "not-a-url",
+        TINIFY_API_URL: "https://api.tinify.ai",
+      }),
+    ).toThrow(/GLASSYPIC_API_URL/);
+  });
 });
