@@ -101,4 +101,16 @@ describe("openBrowser", () => {
     await expect(openBrowser("http://localhost:3000/mcp/authorize", true)).resolves.toBe(true);
     await expect(openBrowser("http://localhost:3000/mcp/authorize")).resolves.toBe(false);
   });
+
+  it("rejects a userinfo trick where the real host is not owned", async () => {
+    vi.stubGlobal("process", { ...process, platform: "darwin" });
+    await expect(openBrowser("https://glassypic.com@evil.test/")).resolves.toBe(false);
+    expect(childProcess.execFile).not.toHaveBeenCalled();
+  });
+
+  it("rejects a multi-label squat on the owned host", async () => {
+    vi.stubGlobal("process", { ...process, platform: "darwin" });
+    await expect(openBrowser("https://glassypic.com.evil.test/")).resolves.toBe(false);
+    expect(childProcess.execFile).not.toHaveBeenCalled();
+  });
 });

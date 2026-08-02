@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -45,41 +45,5 @@ describe("resolveInput", () => {
     await expect(resolveInput("/nonexistent/path.png")).rejects.toThrow(
       "File not found"
     );
-  });
-
-  it("extracts filename from URL path", async () => {
-    const mockFetch = vi.fn().mockResolvedValueOnce({
-      ok: true,
-      arrayBuffer: async () => new TextEncoder().encode("image-data").buffer,
-    });
-    vi.stubGlobal("fetch", mockFetch);
-
-    const result = await resolveInput("https://cdn.example.com/assets/photo.jpg");
-    expect(result.filename).toBe("photo.jpg");
-    expect(result.isUrl).toBe(true);
-    expect(result.buffer.toString()).toBe("image-data");
-  });
-
-  it("uses fallback filename for URLs without clear filename", async () => {
-    const mockFetch = vi.fn().mockResolvedValueOnce({
-      ok: true,
-      arrayBuffer: async () => new ArrayBuffer(10),
-    });
-    vi.stubGlobal("fetch", mockFetch);
-
-    const result = await resolveInput("https://api.example.com/image?id=123");
-    expect(result.filename).toBe("image");
-  });
-
-  it("throws on URL fetch failure", async () => {
-    const mockFetch = vi.fn().mockResolvedValueOnce({
-      ok: false,
-      status: 404,
-    });
-    vi.stubGlobal("fetch", mockFetch);
-
-    await expect(
-      resolveInput("https://example.com/missing.jpg")
-    ).rejects.toThrow("Failed to fetch");
   });
 });

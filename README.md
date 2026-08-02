@@ -329,8 +329,8 @@ All processing happens server-side via the [GlassyPic API](https://api.glassypic
 
 | | Guest | Free | Pro | Max |
 |---|---|---|---|---|
-| Credits/day or month | 20/day | 50/day | 3,000/month | 10,000/month |
-| Images/day (default settings) | ~5 | ~12 | ~750 | ~2,500 |
+| Credits/day or month | 20/day | 30/day | 3,300/month | 12,000/month |
+| Images/day (default settings) | ~5 | ~7 | ~825 | ~3,000 |
 | Cost per image | 4 credits (compress + SEO tags, defaults) | same | same | same |
 | Signup required | No | Free signup | Paid | Paid |
 
@@ -373,7 +373,7 @@ Use the logout tool to sign out.
 Opens a browser window to complete login (Google, Facebook, or email/magic link). After approval, your account is linked and credits are shared with the web app.
 
 ```
-Login complete: user@example.com (Pro tier, 2,850 of 3,000 credits remaining)
+Login complete: user@example.com (Pro tier, 3,150 of 3,300 credits remaining)
 ```
 
 ### status
@@ -382,7 +382,7 @@ Check your current account status and credits before batch processing:
 
 ```
 Logged in as user@example.com (Pro tier)
-Credits: 2,850 of 3,000 remaining
+Credits: 3,150 of 3,300 remaining
 Resets: 03/01/2026, 12:00 AM PST
 ```
 
@@ -406,7 +406,7 @@ Tools: optimize_image, login, logout, status, upgrade
 - Use status to check credits before batch processing
 - Credits: 3 to compress (always), +1 if width/height is set, +2 to upscale, +1 for SEO tags (default). A full pipeline is 7 credits. SVG/ICO output is a flat 1 credit.
 - Resizing up past 1.2x the source triggers an automatic AI upscale (+2 credits) even without output_upscale_factor set — a resize-only call on a small image can cost 7, not 5.
-- Guest: 20 credits/day. Free account: 50/day. Pro: 3,000/month.
+- Guest: 20 credits/day. Free account: 30/day. Pro: 3,300/month.
 - Always use absolute file paths, not relative.
 - Set only width OR height for proportional resize. Set both for exact dimensions.
 - When both dimensions are set, use output_resize_behavior: "crop" for photos, "pad" for logos/icons.
@@ -429,8 +429,8 @@ Tools: optimize_image, login, logout, status, upgrade
 
 **"Insufficient credits" error:**
 - Use the `status` tool to check remaining credits
-- Use the `login` tool to sign in for more credits (free accounts get 50/day)
-- Use the `upgrade` tool to see paid plans (Pro: 3,000/month, Max: 10,000/month)
+- Use the `login` tool to sign in for more credits (free accounts get 30/day)
+- Use the `upgrade` tool to see paid plans (Pro: 3,300/month, Max: 12,000/month)
 - Disable SEO tags (`output_seo_tag_gen: false`) to save 1 credit; note that resizing up past 1.2× the source still adds an automatic 2-credit upscale regardless
 
 **Login browser window doesn't open:**
@@ -468,8 +468,9 @@ account email are written to `~/.glassypic/session.json` with file mode `0600`
 `logout` tool removes the file's token. See also
 [Account & Credits](#account--credits) and [Troubleshooting](#troubleshooting).
 
-**What is not collected.** This server sends no telemetry and makes no network
-call other than to the GlassyPic API.
+**What is not collected.** When run as a local connector, this server sends no
+telemetry and makes no network call other than to the GlassyPic API. (The
+remote HTTP transport additionally calls Supabase for authentication.)
 
 ## Configuration
 

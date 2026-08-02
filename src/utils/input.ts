@@ -25,19 +25,6 @@ export function extractFilenameFromUrl(url: string): string {
 }
 
 export async function resolveInput(input: string): Promise<ResolvedInput> {
-  if (isUrl(input)) {
-    const response = await fetch(input);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch URL: ${input} (HTTP ${response.status})`);
-    }
-    const arrayBuffer = await response.arrayBuffer();
-    return {
-      buffer: Buffer.from(arrayBuffer),
-      filename: extractFilenameFromUrl(input),
-      isUrl: true,
-    };
-  }
-
   const absolutePath = path.resolve(input);
   if (!fs.existsSync(absolutePath)) {
     throw new Error(`File not found: ${absolutePath}`);
