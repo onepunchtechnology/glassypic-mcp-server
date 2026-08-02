@@ -53,14 +53,24 @@ describe("logoutTool", () => {
     expect(result).toMatch(/not logged in/i);
   });
 
-  it("still clears token locally when revokeToken throws", async () => {
+  it("still clears the token locally when revokeToken throws, and warns", async () => {
     getMcpTokenMock.mockReturnValue("mcp_active");
     revokeTokenMock.mockRejectedValue(new Error("network error"));
 
     const result = await logoutTool();
 
     expect(clearMcpTokenMock).toHaveBeenCalledOnce();
-    expect(result).toMatch(/logged out/i);
+    expect(result).toMatch(/could not be reached/i);
+    expect(result).toMatch(/remains valid/i);
+  });
+
+  it("returns the plain message when revocation succeeds", async () => {
+    getMcpTokenMock.mockReturnValue("mcp_active");
+    revokeTokenMock.mockResolvedValue(undefined);
+
+    const result = await logoutTool();
+
+    expect(result).toBe("Logged out. Using guest session (20 free credits/day).");
   });
 });
 

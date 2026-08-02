@@ -11,12 +11,18 @@ export async function logoutTool(): Promise<string> {
     return "Not logged in. Already using guest session (20 free credits/day).";
   }
 
+  let revokeFailed = false;
   try {
     await revokeToken(baseUrl, mcpToken);
   } catch {
-    // Best-effort revocation — clear locally regardless
+    revokeFailed = true;
   }
 
+  // Unconditional: a user who asks to log out must end up logged out locally,
+  // even when the network is unreachable.
   sessionManager.clearMcpToken();
-  return "Logged out. Using guest session (20 free credits/day).";
+
+  return revokeFailed
+    ? "Logged out locally, but GlassyPic could not be reached to revoke the token server-side — it remains valid until it expires. Running login again issues a new token and revokes this one. Using guest session (20 free credits/day)."
+    : "Logged out. Using guest session (20 free credits/day).";
 }
