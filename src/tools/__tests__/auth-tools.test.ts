@@ -5,6 +5,9 @@ const clearMcpTokenMock = vi.hoisted(() => vi.fn());
 const getAccountStatusMock = vi.hoisted(() => vi.fn());
 const revokeTokenMock = vi.hoisted(() => vi.fn());
 const getAuthHeadersMock = vi.hoisted(() => vi.fn());
+const resolveApiBaseUrlMock = vi.hoisted(() =>
+  vi.fn(() => ({ baseUrl: "https://api.glassypic.com", isLoopback: false })),
+);
 
 vi.mock("../../session/manager.js", () => ({
   SessionManager: vi.fn(() => ({
@@ -21,7 +24,7 @@ vi.mock("../../api/auth.js", () => ({
 vi.mock("../../api/client.js", () => ({
   DEFAULT_BASE_URL: "https://api.tinify.ai",
   getAuthHeaders: getAuthHeadersMock,
-  resolveApiBaseUrl: () => ({ baseUrl: "https://api.glassypic.com", isLoopback: false }),
+  resolveApiBaseUrl: resolveApiBaseUrlMock,
 }));
 
 import { logoutTool } from "../logout.js";
@@ -71,6 +74,20 @@ describe("logoutTool", () => {
     const result = await logoutTool();
 
     expect(result).toBe("Logged out. Using guest session (20 free credits/day).");
+  });
+
+  it("still clears the token locally when resolveApiBaseUrl throws on a malformed GLASSYPIC_API_URL", async () => {
+    getMcpTokenMock.mockReturnValue("mcp_active");
+    resolveApiBaseUrlMock.mockImplementationOnce(() => {
+      throw new Error("GLASSYPIC_API_URL must be a valid URL");
+    });
+
+    const result = await logoutTool();
+
+    // Bad config must never block the local clear — the whole point of this test.
+    expect(clearMcpTokenMock).toHaveBeenCalledOnce();
+    expect(revokeTokenMock).not.toHaveBeenCalled();
+    expect(result).toMatch(/could not be reached/i);
   });
 });
 

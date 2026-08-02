@@ -45,7 +45,7 @@ server.registerTool(
       "Optimize an image: smart lossy compression (typically 60-80% size reduction), optional resize/upscale/format conversion, and AI-generated SEO metadata. " +
       "Accepts absolute local file paths or remote URLs. In remote/API mode, only remote URLs are supported. Supported input formats: JPG, PNG, WebP, AVIF, GIF, SVG, ICO, HEIC, TIFF, BMP (max 50 MB). Supported output formats: JPG, PNG, WebP, AVIF, GIF, SVG, ICO. " +
       costSummary() + " " +
-      "Free tier: 20 credits/day, no signup. Log in with the login tool for more credits. Use status tool to check remaining credits before batch processing.",
+      "Guest (unregistered): 20 credits/day, no signup. Log in with the login tool for more credits — registered Free tier is 30/day. Use status tool to check remaining credits before batch processing.",
     inputSchema: {
       input: z
         .string()

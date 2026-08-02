@@ -1,7 +1,7 @@
 import { SessionManager } from "../session/manager.js";
 import { resolveApiBaseUrl } from "../api/client.js";
 import { requestDeviceCode, pollForToken, getAccountStatus } from "../api/auth.js";
-import { openBrowser } from "../utils/browser.js";
+import { openBrowser, isAllowedBrowserUrl } from "../utils/browser.js";
 
 const POLL_INTERVAL_MS = 3_000;
 const POLL_TIMEOUT_MS = 5 * 60 * 1000;
@@ -25,7 +25,17 @@ export async function loginTool(): Promise<string> {
   const { device_code, user_code, verify_url } = await requestDeviceCode(baseUrl);
   const authorizeUrl = `${verify_url}?code=${user_code}`;
 
-  // Open browser
+  // Validate before attempting to open. If the allowlist rejects the host, do
+  // not fall back to printing the URL for the user to open by hand — that
+  // routes around the exact control this check exists to enforce. Only a
+  // genuine launch failure (host is fine, `open`/`xdg-open`/etc. failed)
+  // should fall back to the printed URL.
+  if (!isAllowedBrowserUrl(authorizeUrl, isLoopback)) {
+    throw new Error(
+      `Refusing to open or display the login URL — ${authorizeUrl} is not a recognized GlassyPic host.`,
+    );
+  }
+
   const opened = await openBrowser(authorizeUrl, isLoopback);
   const browserMsg = opened
     ? `Opening browser... Complete login at glassypic.com.`

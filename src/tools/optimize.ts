@@ -17,7 +17,7 @@ export function resolveInput(input: string): ReturnType<typeof resolveInputUtil>
   return resolveInputUtil(input);
 }
 import { resolveUniqueOutputPath } from "../utils/output.js";
-import { DEFAULT_BASE_URL, buildAuthHeaders } from "../api/client.js";
+import { resolveApiBaseUrl, buildAuthHeaders } from "../api/client.js";
 import { SessionManager } from "../session/manager.js";
 
 export interface OptimizeImageParams {
@@ -55,7 +55,10 @@ export interface OptimizeImageResult {
 export async function optimizeImage(
   params: OptimizeImageParams,
 ): Promise<OptimizeImageResult> {
-  const baseUrl = params.baseUrl ?? DEFAULT_BASE_URL;
+  // Explicit param wins (the Slack app and tests rely on passing it directly).
+  // Otherwise fall back to the configured host, not a raw default, so
+  // GLASSYPIC_API_URL actually reaches image processing like it does login/status.
+  const baseUrl = params.baseUrl ?? resolveApiBaseUrl().baseUrl;
 
   // 1. Resolve input and upload
   let authHeaders = buildAuthHeaders(params.authToken);

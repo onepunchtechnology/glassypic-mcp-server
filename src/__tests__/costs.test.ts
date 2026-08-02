@@ -2,10 +2,11 @@ import { describe, it, expect } from "vitest";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
-import { CREDIT_COSTS, SVG_ICO_FLAT_COST, costSummary } from "../costs.js";
+import { CREDIT_COSTS, SVG_ICO_FLAT_COST, AUTO_UPSCALE_THRESHOLD, costSummary } from "../costs.js";
 
 const PKG_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const CREDITS_PY = path.join(PKG_ROOT, "../../services/api/app/services/credits.py");
+const CONFIG_PY = path.join(PKG_ROOT, "../../services/api/app/config.py");
 
 /**
  * Parses the CREDIT_COSTS dict out of the backend source.
@@ -25,6 +26,17 @@ function parseBackendCreditCosts(source: string): Record<string, number> {
   return parsed;
 }
 
+/**
+ * Parses `auto_upscale_threshold: float = 1.2` out of config.py (config.py:98).
+ * Fails loudly (rather than silently matching nothing) if the declaration's
+ * shape ever changes.
+ */
+function parseBackendAutoUpscaleThreshold(source: string): number {
+  const match = source.match(/auto_upscale_threshold\s*:\s*float\s*=\s*([0-9.]+)/);
+  if (!match) throw new Error("auto_upscale_threshold declaration not found in config.py");
+  return Number(match[1]);
+}
+
 describe("cost contract", () => {
   // Skips in the public mirror, which is a git subtree of packages/mcp-server
   // and has no services/api. The release-time diff in DEPLOYMENT.md 5b is the
@@ -36,6 +48,15 @@ describe("cost contract", () => {
 
       expect(Object.keys(backend).sort()).toEqual(["compress", "resize", "tag", "upscale"]);
       expect(backend).toEqual({ ...CREDIT_COSTS });
+    },
+  );
+
+  // Skips in the public mirror, same reasoning as the CREDIT_COSTS check above.
+  it.skipIf(!fs.existsSync(CONFIG_PY))(
+    "matches the backend auto_upscale_threshold",
+    () => {
+      const backendThreshold = parseBackendAutoUpscaleThreshold(fs.readFileSync(CONFIG_PY, "utf8"));
+      expect(AUTO_UPSCALE_THRESHOLD).toBe(backendThreshold);
     },
   );
 

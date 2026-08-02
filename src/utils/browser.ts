@@ -22,28 +22,46 @@ function isLoopback(hostname: string): boolean {
 }
 
 /**
+ * Validates that a URL is safe to hand to the user's default browser: a
+ * parseable URL, https (or http for an explicitly allowed loopback), and
+ * pointed at an owned host (or loopback).
+ *
+ * Exported so callers can check *before* calling openBrowser and distinguish
+ * "the URL was rejected by the allowlist" (never show it to the user — do not
+ * route around the allowlist by asking them to open it by hand) from "the URL
+ * was fine but the browser failed to launch" (a legitimate fallback: printing
+ * the URL is still useful).
+ */
+export function isAllowedBrowserUrl(url: string, allowLoopback = false): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+
+  const loopbackOk = allowLoopback && isLoopback(parsed.hostname);
+  if (parsed.protocol !== "https:" && !(loopbackOk && parsed.protocol === "http:")) {
+    return false;
+  }
+  if (!isOwnedHost(parsed.hostname) && !loopbackOk) {
+    return false;
+  }
+  return true;
+}
+
+/**
  * Opens a URL in the user's default browser.
  *
  * Uses execFile with an argv array rather than exec with an interpolated string,
  * so no shell parses the URL. Resolves false — without spawning anything — for
- * any URL that fails validation.
+ * any URL that fails validation (see isAllowedBrowserUrl).
  *
  * @param allowLoopback Pass true only when the resolved API base URL is itself
  *   loopback, so local development keeps working without weakening the default.
  */
 export function openBrowser(url: string, allowLoopback = false): Promise<boolean> {
-  let parsed: URL;
-  try {
-    parsed = new URL(url);
-  } catch {
-    return Promise.resolve(false);
-  }
-
-  const loopbackOk = allowLoopback && isLoopback(parsed.hostname);
-  if (parsed.protocol !== "https:" && !(loopbackOk && parsed.protocol === "http:")) {
-    return Promise.resolve(false);
-  }
-  if (!isOwnedHost(parsed.hostname) && !loopbackOk) {
+  if (!isAllowedBrowserUrl(url, allowLoopback)) {
     return Promise.resolve(false);
   }
 

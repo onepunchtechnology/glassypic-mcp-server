@@ -690,6 +690,88 @@ describe("optimizeImage", () => {
     });
   });
 
+  describe("baseUrl resolution", () => {
+    const ORIGINAL_ENV = { ...process.env };
+
+    afterEach(() => {
+      process.env = { ...ORIGINAL_ENV };
+    });
+
+    it("contacts the host from GLASSYPIC_API_URL when no explicit baseUrl is passed", async () => {
+      process.env.GLASSYPIC_API_URL = "https://configured.example.com";
+      delete process.env.TINIFY_API_URL;
+
+      vi.mocked(uploadFile).mockResolvedValueOnce({
+        temp_file_id: "temp-1",
+        original_filename: "hero.png",
+        file_size: 50000,
+        mime_type: "image/png",
+        session_token: null,
+      });
+      vi.mocked(triggerProcessing).mockResolvedValueOnce({
+        success: true,
+        jobs: [{ id: "job-1", temp_file_id: "temp-1", status: "queued" }],
+        credits_used: 4,
+        credits_remaining: 16,
+      });
+      vi.mocked(waitForCompletion).mockResolvedValueOnce({
+        job_id: "job-1",
+        status: "completed",
+        processed_size: 30000,
+        processed_format: "png",
+      });
+      vi.mocked(downloadFile).mockResolvedValueOnce({
+        buffer: Buffer.from("data"),
+        filename: "hero.png",
+      });
+
+      // No baseUrl param — this is the path finding 1 fixes: it must not
+      // silently fall back to the hardcoded DEFAULT_BASE_URL.
+      await optimizeImage({
+        input: path.join(tmpDir, "hero.png"),
+      });
+
+      expect(vi.mocked(uploadFile).mock.calls[0][0].baseUrl).toBe("https://configured.example.com");
+      expect(vi.mocked(triggerProcessing).mock.calls[0][0].baseUrl).toBe("https://configured.example.com");
+      expect(vi.mocked(downloadFile).mock.calls[0][0].baseUrl).toBe("https://configured.example.com");
+    });
+
+    it("an explicit params.baseUrl still overrides GLASSYPIC_API_URL", async () => {
+      process.env.GLASSYPIC_API_URL = "https://configured.example.com";
+
+      vi.mocked(uploadFile).mockResolvedValueOnce({
+        temp_file_id: "temp-1",
+        original_filename: "hero.png",
+        file_size: 50000,
+        mime_type: "image/png",
+        session_token: null,
+      });
+      vi.mocked(triggerProcessing).mockResolvedValueOnce({
+        success: true,
+        jobs: [{ id: "job-1", temp_file_id: "temp-1", status: "queued" }],
+        credits_used: 4,
+        credits_remaining: 16,
+      });
+      vi.mocked(waitForCompletion).mockResolvedValueOnce({
+        job_id: "job-1",
+        status: "completed",
+        processed_size: 30000,
+        processed_format: "png",
+      });
+      vi.mocked(downloadFile).mockResolvedValueOnce({
+        buffer: Buffer.from("data"),
+        filename: "hero.png",
+      });
+
+      await optimizeImage({
+        input: path.join(tmpDir, "hero.png"),
+        baseUrl: "https://explicit.example.com",
+      });
+
+      expect(vi.mocked(uploadFile).mock.calls[0][0].baseUrl).toBe("https://explicit.example.com");
+    });
+  });
+
   it("creates parent directories if output_path doesn't exist", async () => {
     vi.mocked(uploadFile).mockResolvedValueOnce({
       temp_file_id: "temp-1",

@@ -464,7 +464,10 @@ When you pass a remote URL to the tool, the GlassyPic API fetches it server-side
 
 **What is stored locally.** When you use the `login` tool, your access token and
 account email are written to `~/.glassypic/session.json` with file mode `0600`
-(owner read/write only). Nothing else is stored on your machine. Running the
+(owner read/write only). If you optimize an image *without* logging in, the
+first upload mints a guest session token, which is written to that same file
+so subsequent calls stay attached to the same guest session's credits — no
+account, email, or personal information is attached to it. Running the
 `logout` tool removes the file's token. See also
 [Account & Credits](#account--credits) and [Troubleshooting](#troubleshooting).
 

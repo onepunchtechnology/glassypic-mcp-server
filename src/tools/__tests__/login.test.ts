@@ -5,6 +5,7 @@ const {
   pollForTokenMock,
   getAccountStatusMock,
   openBrowserMock,
+  isAllowedBrowserUrlMock,
   getMcpTokenMock,
   saveMcpTokenMock,
   clearMcpTokenMock,
@@ -13,6 +14,7 @@ const {
   pollForTokenMock: vi.fn(),
   getAccountStatusMock: vi.fn(),
   openBrowserMock: vi.fn(),
+  isAllowedBrowserUrlMock: vi.fn(() => true),
   getMcpTokenMock: vi.fn(),
   saveMcpTokenMock: vi.fn(),
   clearMcpTokenMock: vi.fn(),
@@ -26,6 +28,7 @@ vi.mock("../../api/auth.js", () => ({
 
 vi.mock("../../utils/browser.js", () => ({
   openBrowser: openBrowserMock,
+  isAllowedBrowserUrl: isAllowedBrowserUrlMock,
 }));
 
 vi.mock("../../session/manager.js", () => ({
@@ -54,6 +57,7 @@ describe("loginTool", () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     openBrowserMock.mockResolvedValue(true);
+    isAllowedBrowserUrlMock.mockReturnValue(true);
     requestDeviceCodeMock.mockResolvedValue(DEVICE_CODE_RESPONSE);
   });
 
@@ -142,5 +146,29 @@ describe("loginTool", () => {
     const result = await resultPromise;
 
     expect(result).toMatch(/timed out|expired/i);
+  });
+
+  it("throws without printing the URL when the allowlist rejects the host", async () => {
+    getMcpTokenMock.mockReturnValue(null);
+    isAllowedBrowserUrlMock.mockReturnValue(false);
+
+    await expect(loginTool()).rejects.toThrow(/not a recognized GlassyPic host/i);
+
+    // Must not route around the allowlist by falling back to openBrowser or
+    // otherwise handing the user a URL it just rejected.
+    expect(openBrowserMock).not.toHaveBeenCalled();
+  });
+
+  it("falls back to printing the URL when the host is allowed but the browser fails to launch", async () => {
+    getMcpTokenMock.mockReturnValue(null);
+    isAllowedBrowserUrlMock.mockReturnValue(true);
+    openBrowserMock.mockResolvedValue(false);
+    pollForTokenMock.mockResolvedValue({ status: "denied" });
+
+    const resultPromise = loginTool();
+    await vi.runAllTimersAsync();
+    await resultPromise;
+
+    expect(openBrowserMock).toHaveBeenCalledOnce();
   });
 });
