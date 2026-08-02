@@ -8,6 +8,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { resolveAuthHeaders } from "../auth/resolver.js";
 import { requestContext } from "../auth/context.js";
+import { resolveApiBaseUrl } from "../api/client.js";
 
 interface Session {
   transport: StreamableHTTPServerTransport;
@@ -24,6 +25,9 @@ const SESSION_IDLE_MS = 30 * 60 * 1000; // 30 minutes
  *                     Called once per session (each client gets its own server instance).
  */
 export async function startHttpServer(createServer: () => McpServer): Promise<void> {
+  // Fail fast on a malformed deployment secret rather than at first tool call.
+  resolveApiBaseUrl();
+
   const app = express();
   app.use(express.json());
 

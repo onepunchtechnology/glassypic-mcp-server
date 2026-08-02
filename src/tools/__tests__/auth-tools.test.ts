@@ -21,6 +21,7 @@ vi.mock("../../api/auth.js", () => ({
 vi.mock("../../api/client.js", () => ({
   DEFAULT_BASE_URL: "https://api.tinify.ai",
   getAuthHeaders: getAuthHeadersMock,
+  resolveApiBaseUrl: () => ({ baseUrl: "https://api.glassypic.com", isLoopback: false }),
 }));
 
 import { logoutTool } from "../logout.js";

@@ -1,5 +1,5 @@
 import { SessionManager } from "../session/manager.js";
-import { DEFAULT_BASE_URL } from "../api/client.js";
+import { resolveApiBaseUrl } from "../api/client.js";
 import { requestDeviceCode, pollForToken, getAccountStatus } from "../api/auth.js";
 import { openBrowser } from "../utils/browser.js";
 
@@ -8,7 +8,7 @@ const POLL_TIMEOUT_MS = 5 * 60 * 1000;
 
 export async function loginTool(): Promise<string> {
   const sessionManager = new SessionManager();
-  const baseUrl = process.env.GLASSYPIC_API_URL ?? process.env.TINIFY_API_URL ?? DEFAULT_BASE_URL;
+  const { baseUrl } = resolveApiBaseUrl();
 
   // If already logged in, return current status
   const existingToken = sessionManager.getMcpToken();

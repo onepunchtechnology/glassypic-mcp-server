@@ -1,8 +1,8 @@
-import { DEFAULT_BASE_URL, getAuthHeaders } from "../api/client.js";
+import { resolveApiBaseUrl, getAuthHeaders } from "../api/client.js";
 import { getAccountStatus } from "../api/auth.js";
 
 export async function statusTool(): Promise<string> {
-  const baseUrl = process.env.GLASSYPIC_API_URL ?? process.env.TINIFY_API_URL ?? DEFAULT_BASE_URL;
+  const { baseUrl } = resolveApiBaseUrl();
   const authHeaders = getAuthHeaders();
   const status = await getAccountStatus(baseUrl, authHeaders);
 
