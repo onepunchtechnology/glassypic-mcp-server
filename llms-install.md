@@ -88,9 +88,9 @@ The server exposes an `optimize_image` tool plus four account management tools.
 
 ## Credits
 
-Base cost per image: 3 credits (compression) + 1 if SEO tags enabled + 1 if resize + 2 if AI upscale.
+Credits: 3 to compress (always), +1 if width or height is set, +2 to upscale, +1 for SEO tags (on by default). A full pipeline is 7 credits. Upscale is charged whether you request it or the server adds it automatically — it does so whenever a resize target exceeds the source by more than 1.2x, so a resize-only call on a small image also costs 7, not 5. SVG or ICO output is a flat 1 credit, overriding everything above.
 Animated GIFs: per-frame cost × number of frames processed (up to gif_frame_limit, default 100).
-Guest tier: 20 credits/day. Free account: 50/day. Pro: 3,000/month. Max: 10,000/month.
+Guest tier: 20 credits/day. Free account: 30/day. Pro: 3,300/month. Max: 12,000/month.
 Need more? Use the `upgrade` tool or visit https://glassypic.com/pricing
 
 ## Account Management
@@ -102,6 +102,6 @@ Four additional tools are available for account management:
 | `login` | Log in via browser (Google, Facebook, or email). Shared credits with web app. |
 | `logout` | Log out and revert to guest session (20 credits/day). |
 | `status` | Check login state, tier, credits remaining, and reset time. |
-| `upgrade` | Open pricing page in browser (Free: 50/day, Pro: 3,000/month, Max: 10,000/month). |
+| `upgrade` | Open pricing page in browser (Free: 30/day, Pro: 3,300/month, Max: 12,000/month). |
 
 Recommended usage: call `status` before batch processing to verify sufficient credits.
