@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { describe, it, expect, vi, beforeAll, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from "vitest";
 
 // Mock MCP SDK before importing index (vi.mock is hoisted)
 vi.mock("@modelcontextprotocol/sdk/server/mcp.js", () => ({
@@ -195,6 +195,72 @@ describe("direct-run guard", () => {
       expect(isDirectEntrypoint(missingPath, path.resolve(missingPath))).toBe(true);
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("tool annotations", () => {
+  beforeEach(() => {
+    vi.stubEnv("MCP_TRANSPORT", "");
+  });
+
+  it("declares the documented hints on all five tools", async () => {
+    const registerTool = vi.fn();
+    vi.mocked(McpServer).mockImplementation(() => ({
+      registerTool,
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    const { createServer } = await import("../index.js");
+    createServer();
+
+    const annotationsFor = (name: string) =>
+      registerTool.mock.calls.find((call) => call[0] === name)?.[1]?.annotations;
+
+    expect(annotationsFor("optimize_image")).toEqual({
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    });
+    expect(annotationsFor("login")).toEqual({
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    });
+    expect(annotationsFor("logout")).toEqual({
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: true,
+      openWorldHint: true,
+    });
+    // destructiveHint is meaningless when readOnlyHint is true, so it is omitted.
+    expect(annotationsFor("status")).toEqual({
+      readOnlyHint: true,
+      idempotentHint: true,
+      openWorldHint: true,
+    });
+    expect(annotationsFor("upgrade")).toEqual({
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    });
+  });
+
+  it("still supplies a title on all five", async () => {
+    const registerTool = vi.fn();
+    vi.mocked(McpServer).mockImplementation(() => ({
+      registerTool,
+      connect: vi.fn().mockResolvedValue(undefined),
+    }) as any);
+
+    const { createServer } = await import("../index.js");
+    createServer();
+
+    for (const call of registerTool.mock.calls) {
+      expect(call[1].title).toBeTruthy();
     }
   });
 });

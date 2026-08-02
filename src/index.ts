@@ -137,6 +137,12 @@ server.registerTool(
       seo_keywords: z.array(z.string()).nullable().describe("AI-generated keywords describing the image"),
       seo_filename: z.string().nullable().describe("AI-generated SEO filename slug without extension"),
     },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
   },
   async (params) => {
     try {
@@ -196,6 +202,12 @@ server.registerTool(
           "After login, MCP automatically picks up your account with shared credits across web and MCP. " +
           "Free: 30 credits/day. Pro: 3,300/month. Max: 12,000/month.",
         inputSchema: {},
+        annotations: {
+          readOnlyHint: false,
+          destructiveHint: false,
+          idempotentHint: false,
+          openWorldHint: true,
+        },
       },
       async () => {
         try {
@@ -215,6 +227,12 @@ server.registerTool(
           "Log out of your GlassyPic account. Reverts to guest session (20 free credits/day). " +
           "Your web app account is not affected.",
         inputSchema: {},
+        annotations: {
+          readOnlyHint: false,
+          destructiveHint: true,
+          idempotentHint: true,
+          openWorldHint: true,
+        },
       },
       async () => {
         try {
@@ -235,6 +253,11 @@ server.registerTool(
         "Check your GlassyPic account status: login state, tier, credits remaining, and credit reset time. " +
         "Use this before batch processing to verify sufficient credits.",
       inputSchema: {},
+      annotations: {
+        readOnlyHint: true,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
     },
     async () => {
       try {
@@ -254,6 +277,12 @@ server.registerTool(
         "Open the GlassyPic pricing page in your browser to upgrade your plan for more credits. " +
         "Plans: Free (30/day), Pro (3,300/month), Max (12,000/month).",
       inputSchema: {},
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
     },
     async () => {
       try {
