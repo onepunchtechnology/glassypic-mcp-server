@@ -31,8 +31,23 @@ export async function loginTool(): Promise<string> {
   // genuine launch failure (host is fine, `open`/`xdg-open`/etc. failed)
   // should fall back to the printed URL.
   if (!isAllowedBrowserUrl(authorizeUrl, isLoopback)) {
+    // Do not echo the full URL (or its query string — it carries user_code)
+    // back through the thrown error: formatErrorForMcp passes Error.message
+    // through verbatim as tool output, so reproducing the rejected URL here
+    // would hand it right back out through the error channel after the
+    // allowlist just blocked it on the success channel. A bare hostname is
+    // not clickable/actionable the way a full authorize URL is, so it's safe
+    // to include for debugging a misconfigured server-side web_url.
+    let rejectedHost: string | null = null;
+    try {
+      rejectedHost = new URL(authorizeUrl).hostname;
+    } catch {
+      // authorizeUrl itself didn't parse — nothing to report
+    }
     throw new Error(
-      `Refusing to open or display the login URL — ${authorizeUrl} is not a recognized GlassyPic host.`,
+      rejectedHost
+        ? `Refusing to open the login URL: host "${rejectedHost}" is not a recognized GlassyPic domain.`
+        : `Refusing to open the login URL: it is not a recognized GlassyPic domain.`,
     );
   }
 

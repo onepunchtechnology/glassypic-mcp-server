@@ -152,7 +152,24 @@ describe("loginTool", () => {
     getMcpTokenMock.mockReturnValue(null);
     isAllowedBrowserUrlMock.mockReturnValue(false);
 
-    await expect(loginTool()).rejects.toThrow(/not a recognized GlassyPic host/i);
+    let caught: Error | undefined;
+    try {
+      await loginTool();
+    } catch (e) {
+      caught = e as Error;
+    }
+
+    expect(caught).toBeDefined();
+    // States the host was rejected...
+    expect(caught!.message).toMatch(/not (a )?recognized/i);
+    // ...but must not reproduce the full URL or the embedded user_code —
+    // formatErrorForMcp passes Error.message through verbatim as tool output,
+    // so this message is the last line of defense the allowlist has. This is
+    // the regression guard: it fails against the old
+    // `${authorizeUrl} is not a recognized GlassyPic host` message.
+    expect(caught!.message).not.toContain(DEVICE_CODE_RESPONSE.verify_url);
+    expect(caught!.message).not.toContain("code=");
+    expect(caught!.message).not.toContain(DEVICE_CODE_RESPONSE.user_code);
 
     // Must not route around the allowlist by falling back to openBrowser or
     // otherwise handing the user a URL it just rejected.
