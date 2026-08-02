@@ -200,7 +200,9 @@ server.registerTool(
           "Log in to your GlassyPic account via browser to unlock more credits. " +
           "Opens a browser window where you complete login (Google, Facebook, or email). " +
           "After login, MCP automatically picks up your account with shared credits across web and MCP. " +
-          "Free: 30 credits/day. Pro: 3,300/month. Max: 12,000/month.",
+          "Free: 30 credits/day. Pro: 3,300/month. Max: 12,000/month. " +
+          "Your access token and email are stored locally at ~/.glassypic/session.json " +
+          "(file mode 0600) until you run logout.",
         inputSchema: {},
         annotations: {
           readOnlyHint: false,

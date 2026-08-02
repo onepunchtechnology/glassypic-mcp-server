@@ -450,6 +450,37 @@ Tools: optimize_image, login, logout, status, upgrade
 - Large images or AI upscaling can take 30-60 seconds
 - The server has a 60-second timeout per job
 
+## Privacy Policy
+
+Full policy: **https://glassypic.com/privacy**
+
+**What is transmitted.** Images you optimize are uploaded to the GlassyPic API
+(`https://api.glassypic.com`) for processing, along with your authentication
+token. Images are retained according to your account tier and then deleted —
+both the original upload and the processed version. See the policy for the
+retention schedule.
+
+**What is stored locally.** When you use the `login` tool, your access token and
+account email are written to `~/.glassypic/session.json` with file mode `0600`
+(owner read/write only). Nothing else is stored on your machine. Running the
+`logout` tool removes the file's token. See also
+[Account & Credits](#account--credits) and [Troubleshooting](#troubleshooting).
+
+**What is not collected.** This server sends no telemetry and makes no network
+call other than to the GlassyPic API.
+
+## Configuration
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `GLASSYPIC_API_URL` | `https://api.glassypic.com` | API endpoint. Development and self-hosting only — most users never set it. |
+| `TINIFY_API_URL` | — | Pre-rename alias for the above. Retained for existing deployments; `GLASSYPIC_API_URL` wins when both are set. |
+
+The value must be an `https` URL. Plain `http` is accepted only for `localhost`
+and `127.0.0.1`, because your images and `Bearer` token are sent to this host. An
+invalid value produces a clear error naming the variable rather than a silent
+request to the wrong endpoint.
+
 ## Requirements
 
 - Node.js >= 18
