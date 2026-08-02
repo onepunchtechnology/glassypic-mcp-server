@@ -53,7 +53,7 @@ describe("loginTool", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-    openBrowserMock.mockReturnValue(true);
+    openBrowserMock.mockResolvedValue(true);
     requestDeviceCodeMock.mockResolvedValue(DEVICE_CODE_RESPONSE);
   });
 

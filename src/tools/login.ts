@@ -8,7 +8,7 @@ const POLL_TIMEOUT_MS = 5 * 60 * 1000;
 
 export async function loginTool(): Promise<string> {
   const sessionManager = new SessionManager();
-  const { baseUrl } = resolveApiBaseUrl();
+  const { baseUrl, isLoopback } = resolveApiBaseUrl();
 
   // If already logged in, return current status
   const existingToken = sessionManager.getMcpToken();
@@ -26,7 +26,7 @@ export async function loginTool(): Promise<string> {
   const authorizeUrl = `${verify_url}?code=${user_code}`;
 
   // Open browser
-  const opened = openBrowser(authorizeUrl);
+  const opened = await openBrowser(authorizeUrl, isLoopback);
   const browserMsg = opened
     ? `Opening browser... Complete login at glassypic.com.`
     : `Open this URL to log in: ${authorizeUrl}`;
