@@ -1,37 +1,59 @@
 #!/usr/bin/env node
-// Pack-level smoke test for the packed .mcpb bundle.
+// Archive smoke test for the packed .mcpb bundle.
 //
-// mcpb/package-lock.json is tracked and installs from its own dependency tree
-// (mcpb/node_modules) — a separate install from the workspace lockfile that
-// `npm test` exercises. Both are valid resolutions of the same `^` ranges in
-// package.json, but they resolve independently and can diverge (see
-// docs/DEPLOYMENT.md §6a). That means `npm test` only proves the *workspace*
-// tree works — nothing proves the *shipped* tree does.
+// This test operates on the REAL PACKED ARCHIVE, not the staging tree. An
+// earlier version of this script spawned mcpb/server/index.js directly out of
+// the staging directory (mcpb/server/ + mcpb/node_modules/) — which proves the
+// staging tree works, but says nothing about the archive `mcpb pack` actually
+// produces. `mcpb pack` applies its own inclusion/exclusion rules (.mcpbignore,
+// manifest-declared files); a packaging omission there — a file silently
+// excluded that the server needs at runtime — went completely undetected by a
+// staging-tree test. The name "pack-level smoke test" was wrong for exactly
+// that reason: it ran before packing, not after, and never touched the .mcpb.
 //
-// This script spawns the packed mcpb/server/index.js exactly like a real
-// client would (stdio, JSON-RPC), and asserts tools/list still returns all
-// five tools with the title/annotations added for the MCP Directory review
-// intact — using whatever SDK version the bundle's own install resolved.
+// This script instead:
+//   1. Extracts the packed .mcpb (an ordinary zip) to a temp directory via the
+//      platform `unzip` binary (Node has no bundled unzip).
+//   2. Reads the extracted manifest.json to find the declared server entry
+//      point, and asserts it actually exists in the extracted tree.
+//   3. Asserts the extracted node_modules contains no @x402/* or viem package
+//      — the crypto-payment removal gate, checked against what actually
+//      shipped, not the staging tree or the lockfile.
+//   4. Spawns the server FROM THE EXTRACTED COPY (not mcpb/server/) and drives
+//      the same initialize -> tools/list sequence as before, keeping every
+//      existing assertion (five tools, non-empty title + annotations object,
+//      status.readOnlyHint=true with no destructiveHint key,
+//      optimize_image.destructiveHint=false).
+//   5. Reports the SDK / supabase-js versions read from the EXTRACTED tree, so
+//      the versions printed are the ones that actually shipped in this archive.
 //
-// Requires a built mcpb/server/ and an installed mcpb/node_modules/ (see
-// docs/DEPLOYMENT.md §6a). Deliberately NOT part of `npm test` or CI — it
-// needs build artifacts that don't exist in a fresh checkout, and wiring a
-// skip-guarded version into the unit suite defeats the point. Run it
-// explicitly, during the release sequence, after `mcpb && npm ci --omit=dev`.
+// Requires a packed archive (see docs/DEPLOYMENT.md §6a):
+//   cd mcpb && npx @anthropic-ai/mcpb pack && cd ..
+// which produces mcpb/mcpb.mcpb (mcpb pack's default output name, independent
+// of the manifest's `name`/`version` fields — only renamed to
+// glassypic-X.Y.Z.mcpb by the release step that follows this smoke test).
+//
+// Deliberately NOT part of `npm test` or CI's `mcp-server` job — it needs a
+// packed archive that doesn't exist in a fresh checkout. It IS run in CI's
+// `mcpb-artifact` job, which reproduces the full release sequence from a clean
+// checkout specifically so this path gets exercised.
+//
+// Usage: node scripts/smoke-mcpb.mjs [path/to/archive.mcpb]
+// Defaults to mcpb/mcpb.mcpb resolved relative to this script's own location
+// (not process.cwd()), so it works whether invoked from the repo root,
+// packages/mcp-server, or CI's working-directory.
 
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { createInterface } from "node:readline";
 import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SERVER_ENTRY = fileURLToPath(new URL("../mcpb/server/index.js", import.meta.url));
-const MCPB_NODE_MODULES = fileURLToPath(new URL("../mcpb/node_modules", import.meta.url));
-const SDK_PKG_JSON = fileURLToPath(
-  new URL("../mcpb/node_modules/@modelcontextprotocol/sdk/package.json", import.meta.url)
-);
-const SUPABASE_PKG_JSON = fileURLToPath(
-  new URL("../mcpb/node_modules/@supabase/supabase-js/package.json", import.meta.url)
-);
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const PKG_ROOT = path.resolve(SCRIPT_DIR, "..");
+const DEFAULT_ARCHIVE = path.join(PKG_ROOT, "mcpb", "mcpb.mcpb");
+const ARCHIVE_PATH = path.resolve(process.argv[2] ?? DEFAULT_ARCHIVE);
 
 const TIMEOUT_MS = 8000;
 const EXPECTED_TOOLS = ["optimize_image", "login", "logout", "status", "upgrade"];
@@ -46,38 +68,31 @@ function assert(cond, message) {
 }
 
 // ── Preconditions ────────────────────────────────────────────────────────────
-if (!fs.existsSync(SERVER_ENTRY)) {
-  console.error(red(`\n✗ smoke-mcpb: ${SERVER_ENTRY} not found.`));
+if (!fs.existsSync(ARCHIVE_PATH)) {
+  console.error(red(`\n✗ smoke-mcpb: archive not found at ${ARCHIVE_PATH}`));
   console.error(
-    dim("  Build the packed bundle first (docs/DEPLOYMENT.md §6a): npm run build && cp -r dist mcpb/server\n")
-  );
-  process.exit(1);
-}
-if (!fs.existsSync(MCPB_NODE_MODULES)) {
-  console.error(red(`\n✗ smoke-mcpb: ${MCPB_NODE_MODULES} not found.`));
-  console.error(
-    dim("  Install the bundle's own dependency tree first (docs/DEPLOYMENT.md §6a): cd mcpb && npm ci --omit=dev\n")
+    dim(
+      "  Pack it first (docs/DEPLOYMENT.md §6a): cd mcpb && npm ci --omit=dev && npx @anthropic-ai/mcpb pack && cd ..\n"
+    )
   );
   process.exit(1);
 }
 
-let sdkVersion = "unknown";
-let supabaseVersion = "unknown";
-try {
-  sdkVersion = JSON.parse(fs.readFileSync(SDK_PKG_JSON, "utf-8")).version;
-} catch {
-  console.error(red(`\n✗ smoke-mcpb: could not read ${SDK_PKG_JSON} — is mcpb/node_modules installed?\n`));
+const unzipCheck = spawnSync("unzip", ["-v"]);
+if (unzipCheck.error) {
+  console.error(
+    red(
+      `\n✗ smoke-mcpb: the "unzip" binary is required to extract the packed .mcpb archive but was not found on PATH.\n`
+    )
+  );
   process.exit(1);
-}
-try {
-  supabaseVersion = JSON.parse(fs.readFileSync(SUPABASE_PKG_JSON, "utf-8")).version;
-} catch {
-  // Non-fatal — the finding is specifically about the SDK; supabase-js is bonus context.
 }
 
 // ── Minimal MCP stdio client ──────────────────────────────────────────────────
 class MCPClient {
-  constructor() {
+  constructor(serverEntry, cwd) {
+    this._serverEntry = serverEntry;
+    this._cwd = cwd;
     this._proc = null;
     this._pending = new Map();
     this._nextId = 1;
@@ -85,7 +100,7 @@ class MCPClient {
   }
 
   start() {
-    this._proc = spawn("node", [SERVER_ENTRY], { stdio: ["pipe", "pipe", "pipe"] });
+    this._proc = spawn("node", [this._serverEntry], { cwd: this._cwd, stdio: ["pipe", "pipe", "pipe"] });
 
     const rl = createInterface({ input: this._proc.stdout });
     rl.on("line", (line) => {
@@ -167,6 +182,7 @@ class MCPClient {
   }
 
   stop() {
+    if (!this._proc) return;
     try {
       this._proc.stdin.end();
     } catch {}
@@ -177,15 +193,75 @@ class MCPClient {
 }
 
 // ── Run ────────────────────────────────────────────────────────────────────────
-console.log(bold("\nsmoke-mcpb — packed .mcpb bundle smoke test\n"));
-console.log(dim(`  server entry:                         ${SERVER_ENTRY}`));
-console.log(dim(`  @modelcontextprotocol/sdk (shipped):  ${sdkVersion}`));
-console.log(dim(`  @supabase/supabase-js (shipped):      ${supabaseVersion}\n`));
-
-const client = new MCPClient();
-client.start();
+let tempDir = null;
+let client = null;
+let exitCode = 0;
 
 try {
+  tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "glassypic-mcpb-smoke-"));
+
+  const unzipResult = spawnSync("unzip", ["-q", ARCHIVE_PATH, "-d", tempDir]);
+  if (unzipResult.status !== 0) {
+    throw new Error(
+      `failed to extract ${ARCHIVE_PATH} into ${tempDir} (unzip exited ${unzipResult.status})` +
+        (unzipResult.stderr?.length ? `\n${unzipResult.stderr.toString()}` : "")
+    );
+  }
+
+  // ── Manifest-driven entry point ─────────────────────────────────────────────
+  const manifestPath = path.join(tempDir, "manifest.json");
+  assert(fs.existsSync(manifestPath), `extracted archive is missing manifest.json at ${manifestPath}`);
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+  const entryPointRel = manifest.server?.entry_point;
+  assert(typeof entryPointRel === "string" && entryPointRel.length > 0, "manifest.json has no server.entry_point");
+  const serverEntry = path.join(tempDir, entryPointRel);
+  assert(
+    fs.existsSync(serverEntry),
+    `packed archive is missing its declared server entry point "${entryPointRel}" (resolved: ${serverEntry}) — mcpb pack or .mcpbignore silently dropped it`
+  );
+
+  // ── Crypto-package gate, against what actually shipped ──────────────────────
+  const nodeModulesDir = path.join(tempDir, "node_modules");
+  assert(fs.existsSync(nodeModulesDir), `extracted archive has no node_modules at ${nodeModulesDir}`);
+  assert(
+    !fs.existsSync(path.join(nodeModulesDir, "viem")),
+    `packed archive's node_modules contains a "viem" package — crypto-payment code must not ship (docs/DEPLOYMENT.md §6a)`
+  );
+  assert(
+    !fs.existsSync(path.join(nodeModulesDir, "@x402")),
+    `packed archive's node_modules contains an "@x402" scope — crypto-payment code must not ship (docs/DEPLOYMENT.md §6a)`
+  );
+
+  // ── Versions, read from the EXTRACTED tree so they reflect what shipped ─────
+  const sdkPkgJsonPath = path.join(nodeModulesDir, "@modelcontextprotocol", "sdk", "package.json");
+  const supabasePkgJsonPath = path.join(nodeModulesDir, "@supabase", "supabase-js", "package.json");
+
+  let sdkVersion = "unknown";
+  try {
+    sdkVersion = JSON.parse(fs.readFileSync(sdkPkgJsonPath, "utf-8")).version;
+  } catch {
+    throw new Error(`could not read ${sdkPkgJsonPath} — packed archive is missing the MCP SDK package`);
+  }
+
+  let supabaseVersion = "unknown";
+  try {
+    supabaseVersion = JSON.parse(fs.readFileSync(supabasePkgJsonPath, "utf-8")).version;
+  } catch {
+    // Non-fatal — the finding is specifically about the SDK; supabase-js is bonus context.
+  }
+
+  console.log(bold("\nsmoke-mcpb — packed .mcpb archive smoke test\n"));
+  console.log(dim(`  archive:                               ${ARCHIVE_PATH}`));
+  console.log(dim(`  extracted to:                          ${tempDir}`));
+  console.log(dim(`  server entry (extracted):              ${serverEntry}`));
+  console.log(dim(`  @modelcontextprotocol/sdk (shipped):   ${sdkVersion}`));
+  console.log(dim(`  @supabase/supabase-js (shipped):       ${supabaseVersion}\n`));
+
+  console.log(green("✓ archive contains its declared entry point and no @x402/*/viem packages"));
+
+  client = new MCPClient(serverEntry, tempDir);
+  client.start();
+
   await client.initialize();
 
   const { tools } = await client.listTools();
@@ -233,7 +309,16 @@ try {
   console.log(dim(`SDK actually served this run: @modelcontextprotocol/sdk@${sdkVersion}\n`));
 } catch (err) {
   console.error(red(`\n✗ smoke-mcpb FAILED: ${err.message}\n`));
-  process.exitCode = 1;
+  exitCode = 1;
 } finally {
-  client.stop();
+  if (client) client.stop();
+  if (tempDir) {
+    try {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    } catch (cleanupErr) {
+      console.error(dim(`  (non-fatal: failed to remove temp dir ${tempDir}: ${cleanupErr.message})`));
+    }
+  }
 }
+
+process.exitCode = exitCode;

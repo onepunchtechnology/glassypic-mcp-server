@@ -22,6 +22,7 @@
     "typecheck": "tsc --noEmit",
     "gen:mcpb": "node scripts/gen-mcpb-manifest.mjs",
     "smoke:mcpb": "node scripts/smoke-mcpb.mjs",
+    "test:assert-no-skips": "node scripts/assert-no-skipped-tests.mjs",
     "prepublishOnly": "npm run test && npm run build"
   },
   "keywords": [
