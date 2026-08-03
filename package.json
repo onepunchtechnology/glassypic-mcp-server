@@ -21,6 +21,7 @@
     "test:live": "node scripts/live-test.mjs",
     "typecheck": "tsc --noEmit",
     "gen:mcpb": "node scripts/gen-mcpb-manifest.mjs",
+    "smoke:mcpb": "node scripts/smoke-mcpb.mjs",
     "prepublishOnly": "npm run test && npm run build"
   },
   "keywords": [
