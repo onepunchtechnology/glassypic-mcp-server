@@ -48,10 +48,10 @@ describe("version consistency", () => {
     expect(readJson("mcpb/package.json").version).toBe(expected);
   });
 
-  // Conditional: mcpb/package-lock.json is a gitignored build input for the packed bundle
-  // (.gitignore:66), not a tracked source — absent from a fresh clone. Do not make this
-  // unconditional; CI and fresh clones don't have it.
-  it.skipIf(!exists("mcpb/package-lock.json"))("mcpb/package-lock.json matches in both places", () => {
+  // Unconditional: mcpb/package-lock.json is tracked (as of the dependency-pinning
+  // fix — see .gitignore, which no longer lists it), so it exists in every clone,
+  // including CI and the public mirror. No skipIf.
+  it("mcpb/package-lock.json matches in both places", () => {
     const lock = readJson("mcpb/package-lock.json");
     expect(lock.version).toBe(expected);
     expect(lock.packages[""].version).toBe(expected);
