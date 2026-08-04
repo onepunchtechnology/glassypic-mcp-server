@@ -28,7 +28,10 @@
 //      the versions printed are the ones that actually shipped in this archive.
 //
 // Requires a packed archive (see docs/DEPLOYMENT.md §6a):
-//   cd mcpb && npx @anthropic-ai/mcpb pack && cd ..
+//   cd mcpb && npx mcpb pack && cd ..
+// `npx mcpb` (never `npx @anthropic-ai/mcpb` or a global `mcpb`) resolves the
+// CLI pinned in ../package.json devDependencies, so the archive this script
+// checks was packed by the same CLI version CI used — see DEPLOYMENT.md §6a.
 // which produces mcpb/mcpb.mcpb (mcpb pack's default output name, independent
 // of the manifest's `name`/`version` fields — only renamed to
 // glassypic-X.Y.Z.mcpb by the release step that follows this smoke test).
@@ -72,7 +75,7 @@ if (!fs.existsSync(ARCHIVE_PATH)) {
   console.error(red(`\n✗ smoke-mcpb: archive not found at ${ARCHIVE_PATH}`));
   console.error(
     dim(
-      "  Pack it first (docs/DEPLOYMENT.md §6a): cd mcpb && npm ci --omit=dev && npx @anthropic-ai/mcpb pack && cd ..\n"
+      "  Pack it first (docs/DEPLOYMENT.md §6a): cd mcpb && npm ci --omit=dev && npx mcpb pack && cd ..\n"
     )
   );
   process.exit(1);

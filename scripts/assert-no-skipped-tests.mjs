@@ -82,7 +82,7 @@ if (skipped.length > 0) {
       dim(
         `\n\nVitest exits 0 on skips — that's the exact blind spot Finding 1 closes. A skip here means an` +
           ` artifact-gated assertion silently didn't run. Rebuild the mcpb bundle first (docs/DEPLOYMENT.md §6a):` +
-          ` npm run gen:mcpb && npm run build && cp -r dist mcpb/server && (cd mcpb && npm ci --omit=dev && npx @anthropic-ai/mcpb pack)\n`
+          ` npm run gen:mcpb && npm run build && cp -r dist mcpb/server && (cd mcpb && npm ci --omit=dev && npx mcpb pack)\n`
       )
   );
   process.exit(1);
