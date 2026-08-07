@@ -430,7 +430,7 @@ Tools: optimize_image, login, logout, status, upgrade
 **"Insufficient credits" error:**
 - Use the `status` tool to check remaining credits
 - Use the `login` tool to sign in for more credits (free accounts get 30/day)
-- Use the `upgrade` tool to see paid plans (Pro: 3,300/month, Max: 12,000/month)
+- Use the `upgrade` tool to open the pricing page and compare plans
 - Disable SEO tags (`output_seo_tag_gen: false`) to save 1 credit; note that resizing up past 1.2× the source still adds an automatic 2-credit upscale regardless
 
 **Login browser window doesn't open:**

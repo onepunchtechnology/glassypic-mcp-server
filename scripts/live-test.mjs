@@ -10,6 +10,15 @@ import * as os from "node:os";
 
 const SERVER_BIN = new URL("../dist/index.js", import.meta.url).pathname;
 
+// Read from package.json rather than hardcoding: this assertion sat at "2.0.0"
+// through the 2.0.1 and 2.0.2 releases without anyone noticing, because
+// test:live is not part of `npm test` or CI, so nothing ever ran it against a
+// bumped version. src/__tests__/version.test.ts covers the other eight
+// occurrences; this file was the gap.
+const EXPECTED_VERSION = JSON.parse(
+  fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+).version;
+
 // ── 20×20 gradient PNG (698 bytes) — large enough for TinyPNG to process ──────
 const TINY_PNG = Buffer.from(
   "89504e470d0a1a0a0000000d494844520000001400000014080200000002eb8a5a" +
@@ -159,7 +168,10 @@ try {
 
   await test("server info reports correct name and version", async () => {
     assert(initResult.serverInfo.name === "glassypic");
-    assert(initResult.serverInfo.version === "2.0.0", `unexpected version: ${initResult.serverInfo.version}`);
+    assert(
+      initResult.serverInfo.version === EXPECTED_VERSION,
+      `unexpected version: ${initResult.serverInfo.version} (package.json says ${EXPECTED_VERSION})`,
+    );
     console.log(dim(`\n       serverInfo: ${JSON.stringify(initResult.serverInfo)}`));
   });
 

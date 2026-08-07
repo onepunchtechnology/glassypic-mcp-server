@@ -102,6 +102,6 @@ Four additional tools are available for account management:
 | `login` | Log in via browser (Google, Facebook, or email). Shared credits with web app. |
 | `logout` | Log out and revert to guest session (20 credits/day). |
 | `status` | Check login state, tier, credits remaining, and reset time. |
-| `upgrade` | Open pricing page in browser (Free: 30/day, Pro: 3,300/month, Max: 12,000/month). |
+| `upgrade` | Open the pricing page in the browser to review or change the account's plan. |
 
 Recommended usage: call `status` before batch processing to verify sufficient credits.

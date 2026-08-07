@@ -4,7 +4,7 @@
   "display_name": "GlassyPic",
   "version": "2.1.0",
   "description": "Production-ready images in one pass: resize, crop, compress, convert, upscale, and generate SEO metadata",
-  "long_description": "One tool that turns raw images into production-ready assets in a single pass (typically 60-80% size reduction), collapsing resize, crop, compression, format conversion, optional AI upscaling, and SEO metadata generation into one step. Supports JPEG, PNG, WebP, HEIC, GIF, AVIF, TIFF, and BMP. Accepts absolute local file paths or remote URLs as input. Upscaling is one optional step of that pipeline, performed by Real-ESRGAN on the image you supply: it takes no prompt, introduces no new subject matter, and returns your own image at higher resolution. This is not a standalone image, video, or audio generation service.",
+  "long_description": "One tool that turns raw images into production-ready assets in a single pass (typically 60-80% size reduction), collapsing resize, crop, compression, format conversion, optional AI upscaling, and SEO metadata generation into one step. Supports JPEG, PNG, WebP, HEIC, GIF, AVIF, TIFF, and BMP. Accepts absolute local file paths or remote URLs as input. Upscaling is one step of that pipeline, performed by Real-ESRGAN on the image you supply: it takes no prompt, introduces no new subject matter, and returns your own image at higher resolution. It runs on two triggers: explicitly, when the caller sets output_upscale_factor, and automatically, when a resize target exceeds the source by more than 1.2x. The automatic path is the more common one and the caller does not request it. This is not a standalone image, video, or audio generation service.",
   "author": {
     "name": "onepunchtechnology",
     "url": "https://github.com/onepunchtechnology"
@@ -57,7 +57,7 @@
     },
     {
       "name": "upgrade",
-      "description": "Open the GlassyPic billing page in the user's browser to review or change the account's plan."
+      "description": "Open the GlassyPic pricing page in the user's browser to review or change the account's plan."
     }
   ],
   "compatibility": {

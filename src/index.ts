@@ -200,7 +200,7 @@ server.registerTool(
           "Log in to your GlassyPic account via browser to unlock more credits. " +
           "Opens a browser window where you complete login (Google, Facebook, or email). " +
           "After login, MCP automatically picks up your account with shared credits across web and MCP. " +
-          "Free: 30 credits/day. Pro: 3,300/month. Max: 12,000/month. " +
+          "Registered accounts receive a larger credit allowance than guest sessions; use the status tool to read the account's actual tier and remaining credits. " +
           "Your access token and email are stored locally at ~/.glassypic/session.json " +
           "(file mode 0600) until you run logout.",
         inputSchema: {},
@@ -274,9 +274,9 @@ server.registerTool(
   server.registerTool(
     "upgrade",
     {
-      title: "Open Billing Page",
+      title: "Open Pricing Page",
       description:
-        "Open the GlassyPic billing page in the user's browser, where the account's plan and credit allowance can be reviewed and changed. " +
+        "Open the GlassyPic pricing page in the user's browser, where the account's plan can be reviewed and changed. " +
         "Call this only when the user asks to change or review their plan.",
       inputSchema: {},
       annotations: {
