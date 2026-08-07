@@ -1,8 +1,8 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.onepunchtechnology/glassypic",
-  "version": "2.0.2",
-  "description": "AI image processing: upscale, resize, crop, compress, convert file format, and generate SEO metadata",
+  "version": "2.1.0",
+  "description": "Production-ready images in one pass: resize, crop, compress, convert file format, upscale, and generate SEO metadata",
   "repository": {
     "url": "https://github.com/onepunchtechnology/glassypic-mcp-server",
     "source": "github"
@@ -17,7 +17,7 @@
     {
       "registryType": "npm",
       "identifier": "@glassypic/mcp-server",
-      "version": "2.0.2",
+      "version": "2.1.0",
       "transport": {
         "type": "stdio"
       }

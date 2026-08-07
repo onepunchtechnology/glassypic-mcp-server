@@ -2,9 +2,9 @@
   "manifest_version": "0.3",
   "name": "glassypic",
   "display_name": "GlassyPic",
-  "version": "2.0.2",
-  "description": "AI image processing: upscale, resize, crop, compress, convert, and generate SEO metadata",
-  "long_description": "One tool that turns raw images into production-ready assets using AI-powered algorithm and multi-step agents (typically 60-80% size reduction), with optional resize, upscale, format conversion, and SEO metadata generation. Supports JPEG, PNG, WebP, HEIC, GIF, AVIF, TIFF, and BMP. Accepts absolute local file paths or remote URLs as input.",
+  "version": "2.1.0",
+  "description": "Production-ready images in one pass: resize, crop, compress, convert, upscale, and generate SEO metadata",
+  "long_description": "One tool that turns raw images into production-ready assets in a single pass (typically 60-80% size reduction), collapsing resize, crop, compression, format conversion, optional AI upscaling, and SEO metadata generation into one step. Supports JPEG, PNG, WebP, HEIC, GIF, AVIF, TIFF, and BMP. Accepts absolute local file paths or remote URLs as input. Upscaling is one optional step of that pipeline, performed by Real-ESRGAN on the image you supply: it takes no prompt, introduces no new subject matter, and returns your own image at higher resolution. This is not a standalone image, video, or audio generation service.",
   "author": {
     "name": "onepunchtechnology",
     "url": "https://github.com/onepunchtechnology"
@@ -41,7 +41,7 @@
   "tools": [
     {
       "name": "optimize_image",
-      "description": "Compress, resize, upscale, convert format, generate SEO-optimized filename and alt text for an image. Accepts local file paths or URLs."
+      "description": "Compress, resize, crop, convert format, optionally upscale, and generate SEO-optimized filename and alt text for an image. Accepts local file paths or URLs."
     },
     {
       "name": "login",
@@ -57,7 +57,7 @@
     },
     {
       "name": "upgrade",
-      "description": "Open the GlassyPic pricing page to upgrade your plan."
+      "description": "Open the GlassyPic billing page in the user's browser to review or change the account's plan."
     }
   ],
   "compatibility": {

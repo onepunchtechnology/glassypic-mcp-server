@@ -34,7 +34,7 @@ export function isDirectEntrypoint(argvPath: string | undefined, modulePath: str
 export function createServer(): McpServer {
   const server = new McpServer({
     name: "glassypic",
-    version: "2.0.2",
+    version: "2.1.0",
   });
 
 server.registerTool(
@@ -274,10 +274,10 @@ server.registerTool(
   server.registerTool(
     "upgrade",
     {
-      title: "Upgrade Plan",
+      title: "Open Billing Page",
       description:
-        "Open the GlassyPic pricing page in your browser to upgrade your plan for more credits. " +
-        "Plans: Free (30/day), Pro (3,300/month), Max (12,000/month).",
+        "Open the GlassyPic billing page in the user's browser, where the account's plan and credit allowance can be reviewed and changed. " +
+        "Call this only when the user asks to change or review their plan.",
       inputSchema: {},
       annotations: {
         readOnlyHint: false,
