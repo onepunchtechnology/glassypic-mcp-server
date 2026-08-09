@@ -2,13 +2,85 @@
 // Functional test for @glassypic/mcp-server as an anonymous user
 // Tests the real API — consumes live credits
 
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { createInterface } from "node:readline";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
 
-const SERVER_BIN = new URL("../dist/index.js", import.meta.url).pathname;
+// Two targets, one suite.
+//
+//   node scripts/live-test.mjs                      → dist/index.js (workspace build)
+//   node scripts/live-test.mjs --bundle <file.mcpb> → the packed archive, extracted
+//
+// Why the second mode exists: before it, nothing ever called a tool through the
+// artifact we actually ship. scripts/smoke-mcpb.mjs drives the packed archive but
+// stops at initialize -> tools/list, so it proves the bundle boots and declares its
+// tools, not that any of them work. This file proved the tools work, but against
+// dist/, which resolves a *different* dependency tree — at the time of writing the
+// bundle served @modelcontextprotocol/sdk@1.30.0 while the workspace resolved
+// 1.20.1. So "the tools work" had only ever been established on an SDK that isn't
+// the one in the file users download.
+//
+// Extraction mirrors smoke-mcpb.mjs: a .mcpb is an ordinary zip, and Node has no
+// bundled unzip, so shell out to the platform binary and clean up on every exit path.
+let SERVER_BIN;
+let extractedBundleDir = null;
+
+const bundleFlagIndex = process.argv.indexOf("--bundle");
+if (bundleFlagIndex !== -1) {
+  const archivePath = path.resolve(process.argv[bundleFlagIndex + 1] ?? "");
+  if (!fs.existsSync(archivePath)) {
+    console.error(`live-test: no archive at ${archivePath}\nPack one first: npm run build && cp -r dist mcpb/server && (cd mcpb && npx mcpb pack)`);
+    process.exit(1);
+  }
+  if (spawnSync("unzip", ["-v"]).error) {
+    console.error(`live-test: the "unzip" binary is required to extract a .mcpb but was not found on PATH.`);
+    process.exit(1);
+  }
+
+  extractedBundleDir = fs.mkdtempSync(path.join(os.tmpdir(), "glassypic-mcpb-live-"));
+  const unzipResult = spawnSync("unzip", ["-q", archivePath, "-d", extractedBundleDir]);
+  if (unzipResult.status !== 0) {
+    console.error(`live-test: failed to extract ${archivePath} (unzip exited ${unzipResult.status})`);
+    fs.rmSync(extractedBundleDir, { recursive: true, force: true });
+    process.exit(1);
+  }
+
+  // Resolve the entry point from the extracted manifest rather than assuming
+  // server/index.js — the manifest is what a host reads, so trusting anything
+  // else would test a path no client uses.
+  const manifestPath = path.join(extractedBundleDir, "manifest.json");
+  if (!fs.existsSync(manifestPath)) {
+    console.error(`live-test: extracted archive has no manifest.json at ${manifestPath}`);
+    fs.rmSync(extractedBundleDir, { recursive: true, force: true });
+    process.exit(1);
+  }
+  const entryPoint = JSON.parse(fs.readFileSync(manifestPath, "utf8"))?.server?.entry_point;
+  SERVER_BIN = path.join(extractedBundleDir, entryPoint ?? "server/index.js");
+  if (!fs.existsSync(SERVER_BIN)) {
+    console.error(`live-test: manifest declares entry point "${entryPoint}" but it does not exist in the extracted tree`);
+    fs.rmSync(extractedBundleDir, { recursive: true, force: true });
+    process.exit(1);
+  }
+
+  const cleanupExtracted = () => {
+    if (extractedBundleDir) {
+      fs.rmSync(extractedBundleDir, { recursive: true, force: true });
+      extractedBundleDir = null;
+    }
+  };
+  process.on("exit", cleanupExtracted);
+  process.on("SIGINT", () => { cleanupExtracted(); process.exit(130); });
+  process.on("SIGTERM", () => { cleanupExtracted(); process.exit(143); });
+
+  console.log(`live-test target: PACKED BUNDLE ${path.basename(archivePath)}`);
+  console.log(`  extracted to:   ${extractedBundleDir}`);
+  console.log(`  entry point:    ${entryPoint}`);
+} else {
+  SERVER_BIN = new URL("../dist/index.js", import.meta.url).pathname;
+  console.log("live-test target: dist/index.js (workspace build) — pass --bundle <file.mcpb> to test the shipped artifact instead");
+}
 
 // Read from package.json rather than hardcoding: this assertion sat at "2.0.0"
 // through the 2.0.1 and 2.0.2 releases without anyone noticing, because
@@ -217,9 +289,30 @@ try {
     console.log(dim(`\n       output_path: ${outPath}`));
   });
 
-  await test("output filename has .tinified suffix", async () => {
+  // Naming depends on whether an SEO filename came back. src/utils/output.ts:28-33
+  // returns `${seoFilename}${ext}` when one exists and falls back to
+  // `${name}.tinified${ext}` when it doesn't, which src/index.ts:60 documents as
+  // "named with SEO slug when SEO is enabled or .tinified suffix otherwise".
+  //
+  // This assertion used to require `.tinified.` unconditionally. It predates the
+  // SEO-slug naming and had been failing silently ever since, because test:live is
+  // not in `npm test` or CI so nothing ran it — the same reason the version
+  // assertion above sat pinned at 2.0.0 across two releases.
+  await test("output filename matches the naming rule for its SEO state", async () => {
     const outPath = basicResult.structuredContent?.output_path;
-    assert(outPath.includes(".tinified."), `expected .tinified. in path, got: ${outPath}`);
+    const seoFilename = basicResult.structuredContent?.seo_filename;
+
+    if (seoFilename) {
+      assert(
+        path.basename(outPath).startsWith(seoFilename),
+        `SEO filename "${seoFilename}" was returned, so the output should be named after it, got: ${path.basename(outPath)}`,
+      );
+    } else {
+      assert(
+        outPath.includes(".tinified."),
+        `no SEO filename was returned, so the output should carry the .tinified suffix, got: ${outPath}`,
+      );
+    }
   });
 
   await test("structuredContent has expected fields", async () => {

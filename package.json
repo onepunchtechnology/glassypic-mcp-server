@@ -19,6 +19,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:live": "node scripts/live-test.mjs",
+    "test:live:bundle": "node scripts/live-test.mjs --bundle glassypic-$npm_package_version.mcpb",
     "typecheck": "tsc --noEmit",
     "gen:mcpb": "node scripts/gen-mcpb-manifest.mjs",
     "smoke:mcpb": "node scripts/smoke-mcpb.mjs",
