@@ -22,6 +22,9 @@ export interface OptimizeBufferResult {
   bytes: Buffer;
   seo_alt_text: string | null;
   seo_filename: string | null;
+  /** False when seo_alt_text/seo_filename are a fallback, not real AI tagging. Defaults to
+   * true when the server response omits the field (older API version). */
+  executed_tag: boolean;
   processed_format: string | null;
   output_width_px: number | null;
   output_height_px: number | null;
@@ -86,6 +89,7 @@ export async function optimizeBuffer(params: OptimizeBufferParams): Promise<Opti
     bytes: Buffer.from(await downloadResponse.arrayBuffer()),
     seo_alt_text: completedJob.seo_alt_text ?? null,
     seo_filename: completedJob.seo_filename ?? null,
+    executed_tag: completedJob.executed_tag ?? true,
     processed_format: completedJob.processed_format ?? null,
     output_width_px: completedJob.processed_width ?? null,
     output_height_px: completedJob.processed_height ?? null,

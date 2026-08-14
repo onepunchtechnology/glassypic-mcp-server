@@ -267,6 +267,53 @@ describe("optimizeBuffer", () => {
     expect(vi.mocked(triggerProcessing).mock.calls[0][0].settings.output_format).toBe("original");
   });
 
+  it("propagates executed_tag: false when the server's tag step fell back", async () => {
+    vi.mocked(triggerProcessing).mockResolvedValue({
+      success: true,
+      jobs: [{ id: "j1", temp_file_id: "t1", status: "queued" }],
+      credits_used: 3,
+      credits_remaining: 95,
+    });
+    vi.mocked(waitForCompletion).mockResolvedValue({
+      job_id: "j1",
+      status: "completed",
+      processed_size: 400000,
+      seo_alt_text: "source F0BPK2J1X3R image",
+      seo_filename: "source-f0bpk2j1x3r",
+      executed_tag: false,
+    });
+    fetchMock.mockResolvedValue(new Response(new Uint8Array([9]), { status: 200 }));
+
+    const out = await optimizeBuffer({
+      bytes: Buffer.from([1]), filename: "c.png", mimetype: "image/png",
+      output_width_px: 1080, output_height_px: 1080, output_resize_behavior: "crop",
+      output_seo_tag_gen: true, authToken: "guest_1", idempotencyKey: "k", baseUrl: "https://api.test",
+    });
+
+    expect(out.executed_tag).toBe(false);
+  });
+
+  it("defaults executed_tag to true when the server response omits it (version-skew safety)", async () => {
+    vi.mocked(triggerProcessing).mockResolvedValue({
+      success: true,
+      jobs: [{ id: "j1", temp_file_id: "t1", status: "queued" }],
+      credits_used: 4,
+      credits_remaining: 95,
+    });
+    vi.mocked(waitForCompletion).mockResolvedValue({
+      job_id: "j1", status: "completed", processed_size: 400000, seo_alt_text: "a cat",
+    });
+    fetchMock.mockResolvedValue(new Response(new Uint8Array([9]), { status: 200 }));
+
+    const out = await optimizeBuffer({
+      bytes: Buffer.from([1]), filename: "c.png", mimetype: "image/png",
+      output_width_px: 1080, output_height_px: 1080, output_resize_behavior: "crop",
+      authToken: "guest_1", idempotencyKey: "k", baseUrl: "https://api.test",
+    });
+
+    expect(out.executed_tag).toBe(true);
+  });
+
   it("rejects a blank tenant auth token before using ambient credentials", async () => {
     const sessionDir = path.join(tmpHome, ".glassypic");
     fs.mkdirSync(sessionDir, { recursive: true });

@@ -25,6 +25,9 @@ export interface CompletedJob {
   seo_alt_text?: string | null;
   seo_filename?: string | null;
   seo_keywords?: string[] | null;
+  /** False when the tag step fell back to a filename-derived placeholder (e.g. a Gemini
+   * timeout) instead of real AI tagging — the caller wasn't charged for it either. */
+  executed_tag?: boolean;
   error?: string | null;
 }
 
