@@ -85,11 +85,17 @@ export async function optimizeBuffer(params: OptimizeBufferParams): Promise<Opti
     );
   }
 
+  const executedTag = completedJob.executed_tag ?? true;
   return {
     bytes: Buffer.from(await downloadResponse.arrayBuffer()),
-    seo_alt_text: completedJob.seo_alt_text ?? null,
-    seo_filename: completedJob.seo_filename ?? null,
-    executed_tag: completedJob.executed_tag ?? true,
+    // Defensive, not just trusting the server: the backend normally nulls these on a tag
+    // fallback, but a stale/version-skewed revision could still return the fallback
+    // placeholder alongside executed_tag: false. Slack copies seo_alt_text straight into the
+    // upload's accessibility alt_text, so a client-side gate here is the last checkpoint
+    // before that fallback text would be presented as real AI output.
+    seo_alt_text: executedTag ? (completedJob.seo_alt_text ?? null) : null,
+    seo_filename: executedTag ? (completedJob.seo_filename ?? null) : null,
+    executed_tag: executedTag,
     processed_format: completedJob.processed_format ?? null,
     output_width_px: completedJob.processed_width ?? null,
     output_height_px: completedJob.processed_height ?? null,

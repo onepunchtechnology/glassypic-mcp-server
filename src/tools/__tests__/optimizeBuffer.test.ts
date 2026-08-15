@@ -291,6 +291,13 @@ describe("optimizeBuffer", () => {
     });
 
     expect(out.executed_tag).toBe(false);
+    // Defensive: this response simulates a stale/version-skewed server that still returned the
+    // fallback placeholder alongside executed_tag: false (the current backend normally nulls
+    // these itself — this is the client-side backstop for when it doesn't). Slack copies
+    // seo_alt_text straight into the upload's accessibility metadata with no fallback check of
+    // its own, so the placeholder must never reach it as if it were real AI output.
+    expect(out.seo_alt_text).toBeNull();
+    expect(out.seo_filename).toBeNull();
   });
 
   it("defaults executed_tag to true when the server response omits it (version-skew safety)", async () => {
@@ -312,6 +319,8 @@ describe("optimizeBuffer", () => {
     });
 
     expect(out.executed_tag).toBe(true);
+    // executed_tag defaulting to true (server omitted the field) must NOT null out real content.
+    expect(out.seo_alt_text).toBe("a cat");
   });
 
   it("rejects a blank tenant auth token before using ambient credentials", async () => {
