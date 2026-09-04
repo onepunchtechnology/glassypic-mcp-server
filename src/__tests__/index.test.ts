@@ -53,7 +53,7 @@ describe("optimize_image tool handler (index.ts)", () => {
 
   function makeResult(overrides: Partial<OptimizeImageResult> = {}): OptimizeImageResult {
     return {
-      output_path: "/Users/me/hero.tinified.png",
+      output_path: "/Users/me/hero.polished.png",
       output_size_bytes: 30720,
       output_width_px: 800,
       output_height_px: 600,
@@ -71,7 +71,7 @@ describe("optimize_image tool handler (index.ts)", () => {
 
     const result = await handler({ input: "/Users/me/hero.png" });
 
-    expect(result.content[0].text).toContain("Optimized: /Users/me/hero.tinified.png");
+    expect(result.content[0].text).toContain("Optimized: /Users/me/hero.polished.png");
     expect(result.content[0].text).toContain("30.0 KB");
     expect(result.content[0].text).toContain("60%");
     expect(result.content[0].text).toContain("Format: png");
@@ -103,7 +103,7 @@ describe("optimize_image tool handler (index.ts)", () => {
 
   it("returns structuredContent with the full result object", async () => {
     const mockResult = makeResult({
-      output_path: "/Users/me/hero.tinified.webp",
+      output_path: "/Users/me/hero.polished.webp",
       output_format: "webp",
     });
     vi.mocked(optimizeImage).mockResolvedValueOnce(mockResult);

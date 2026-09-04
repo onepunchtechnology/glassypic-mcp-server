@@ -57,7 +57,7 @@ server.registerTool(
         .optional()
         .describe(
           "Where to save. Accepts a file path (/tmp/out.webp) or directory ending in / (/tmp/images/). " +
-          "If omitted: saves next to original, named with SEO slug when SEO is enabled or .tinified suffix otherwise. URLs save to current working directory.",
+          "If omitted: saves next to original, named with SEO slug when SEO is enabled or .polished suffix otherwise. URLs save to current working directory.",
         ),
       output_format: z
         .enum(["original", "jpg", "png", "webp", "avif", "gif", "svg", "ico"])

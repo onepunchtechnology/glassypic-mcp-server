@@ -81,7 +81,7 @@ describe("optimizeImage", () => {
 
     vi.mocked(downloadFile).mockResolvedValueOnce({
       buffer: Buffer.from("optimized-png"),
-      filename: "hero.tinified.png",
+      filename: "hero.polished.png",
     });
 
     const result = await optimizeImage({
@@ -195,7 +195,7 @@ describe("optimizeImage", () => {
     });
     vi.mocked(downloadFile).mockResolvedValueOnce({
       buffer: Buffer.from("webp-data"),
-      filename: "hero.tinified.webp",
+      filename: "hero.polished.webp",
     });
 
     await optimizeImage({
@@ -340,7 +340,7 @@ describe("optimizeImage", () => {
       });
       vi.mocked(downloadFile).mockResolvedValueOnce({
         buffer: Buffer.from("optimized-jpg"),
-        filename: "photo.tinified.jpg",
+        filename: "photo.polished.jpg",
       });
 
       const result = await optimizeImage({
@@ -418,7 +418,7 @@ describe("optimizeImage", () => {
     });
     vi.mocked(downloadFile).mockResolvedValueOnce({
       buffer: Buffer.from("data"),
-      filename: "hero.tinified.png",
+      filename: "hero.polished.png",
     });
 
     await optimizeImage({
@@ -451,7 +451,7 @@ describe("optimizeImage", () => {
     });
     vi.mocked(downloadFile).mockResolvedValueOnce({
       buffer: Buffer.alloc(12345),
-      filename: "hero.tinified.png",
+      filename: "hero.polished.png",
     });
 
     const result = await optimizeImage({
@@ -484,7 +484,7 @@ describe("optimizeImage", () => {
     });
     vi.mocked(downloadFile).mockResolvedValueOnce({
       buffer: Buffer.from("data"),
-      filename: "hero.tinified.png",
+      filename: "hero.polished.png",
     });
 
     await optimizeImage({
@@ -526,7 +526,7 @@ describe("optimizeImage", () => {
       });
       vi.mocked(downloadFile).mockResolvedValueOnce({
         buffer: Buffer.from("data"),
-        filename: "hero.tinified.png",
+        filename: "hero.polished.png",
       });
     }
 
@@ -622,7 +622,7 @@ describe("optimizeImage", () => {
       });
       vi.mocked(downloadFile).mockResolvedValueOnce({
         buffer: Buffer.from("data"),
-        filename: "hero.tinified.png",
+        filename: "hero.polished.png",
       });
     }
 
@@ -635,11 +635,11 @@ describe("optimizeImage", () => {
       });
 
       expect(result.output_path).toContain("scenic-mountain-hero.png");
-      expect(result.output_path).not.toContain("tinified");
+      expect(result.output_path).not.toContain("polished");
       expect(fs.existsSync(result.output_path)).toBe(true);
     });
 
-    it("falls back to tinified pattern when output_seo_tag_gen=false", async () => {
+    it("falls back to polished pattern when output_seo_tag_gen=false", async () => {
       mockWithSeoFilename("scenic-mountain-hero");
 
       const result = await optimizeImage({
@@ -648,10 +648,10 @@ describe("optimizeImage", () => {
         output_seo_tag_gen: false,
       });
 
-      expect(result.output_path).toContain("hero.tinified.png");
+      expect(result.output_path).toContain("hero.polished.png");
     });
 
-    it("falls back to tinified pattern when seo_filename is null", async () => {
+    it("falls back to polished pattern when seo_filename is null", async () => {
       mockWithSeoFilename(null);
 
       const result = await optimizeImage({
@@ -659,7 +659,7 @@ describe("optimizeImage", () => {
         baseUrl: "https://api.tinify.ai",
       });
 
-      expect(result.output_path).toContain("hero.tinified.png");
+      expect(result.output_path).toContain("hero.polished.png");
     });
 
     it("explicit full output_path is always used regardless of SEO filename", async () => {

@@ -266,7 +266,7 @@ describe("API integration tests (real HTTP server, no fetch mock)", () => {
       testServer.setHandler((_req, res) => {
         res.writeHead(200, {
           "Content-Type": "image/webp",
-          "Content-Disposition": 'attachment; filename="hero.tinified.webp"',
+          "Content-Disposition": 'attachment; filename="hero.polished.webp"',
         });
         res.end(imageData);
       });
@@ -274,7 +274,7 @@ describe("API integration tests (real HTTP server, no fetch mock)", () => {
       const result = await downloadFile({ baseUrl, jobId: "job-real-1" });
 
       expect(result.buffer).toEqual(imageData);
-      expect(result.filename).toBe("hero.tinified.webp");
+      expect(result.filename).toBe("hero.polished.webp");
     });
 
     it("constructs the correct download URL with the job ID", async () => {

@@ -13,7 +13,7 @@ describe("downloadFile", () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       headers: new Headers({
-        "Content-Disposition": 'attachment; filename="hero.tinified.webp"',
+        "Content-Disposition": 'attachment; filename="hero.polished.webp"',
       }),
       arrayBuffer: async () => new ArrayBuffer(100),
     });
@@ -25,7 +25,7 @@ describe("downloadFile", () => {
 
     expect(result.buffer).toBeInstanceOf(Buffer);
     expect(result.buffer.length).toBe(100);
-    expect(result.filename).toBe("hero.tinified.webp");
+    expect(result.filename).toBe("hero.polished.webp");
   });
 
   it("sends auth headers when provided", async () => {

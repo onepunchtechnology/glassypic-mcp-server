@@ -3,7 +3,7 @@ import { resolveOutputPath, resolveUniqueOutputPath } from "../output.js";
 import * as fs from "node:fs";
 
 describe("resolveOutputPath", () => {
-  it("saves next to original with tinified suffix", () => {
+  it("saves next to original with polished suffix", () => {
     expect(
       resolveOutputPath({
         inputPath: "/Users/me/img/hero.png",
@@ -12,7 +12,7 @@ describe("resolveOutputPath", () => {
         outputPath: undefined,
         outputFormat: undefined,
       })
-    ).toBe("/Users/me/img/hero.tinified.png");
+    ).toBe("/Users/me/img/hero.polished.png");
   });
 
   it("uses new extension on format change", () => {
@@ -24,7 +24,7 @@ describe("resolveOutputPath", () => {
         outputPath: undefined,
         outputFormat: "webp",
       })
-    ).toBe("/Users/me/img/hero.tinified.webp");
+    ).toBe("/Users/me/img/hero.polished.webp");
   });
 
   it("uses explicit output path as-is", () => {
@@ -39,7 +39,7 @@ describe("resolveOutputPath", () => {
     ).toBe("/Users/me/dist/hero.webp");
   });
 
-  it("appends tinified filename to directory output_path", () => {
+  it("appends polished filename to directory output_path", () => {
     expect(
       resolveOutputPath({
         inputPath: "/Users/me/img/hero.png",
@@ -48,10 +48,10 @@ describe("resolveOutputPath", () => {
         outputPath: "/Users/me/dist/",
         outputFormat: undefined,
       })
-    ).toBe("/Users/me/dist/hero.tinified.png");
+    ).toBe("/Users/me/dist/hero.polished.png");
   });
 
-  it("saves URL input to CWD with tinified suffix", () => {
+  it("saves URL input to CWD with polished suffix", () => {
     expect(
       resolveOutputPath({
         inputPath: "https://cdn.example.com/photo.jpg",
@@ -61,10 +61,10 @@ describe("resolveOutputPath", () => {
         outputFormat: undefined,
         cwd: "/Users/me/project",
       })
-    ).toBe("/Users/me/project/photo.tinified.jpg");
+    ).toBe("/Users/me/project/photo.polished.jpg");
   });
 
-  it("saves URL to output directory with tinified suffix", () => {
+  it("saves URL to output directory with polished suffix", () => {
     expect(
       resolveOutputPath({
         inputPath: "https://cdn.example.com/photo.jpg",
@@ -73,7 +73,7 @@ describe("resolveOutputPath", () => {
         outputPath: "/Users/me/assets/",
         outputFormat: undefined,
       })
-    ).toBe("/Users/me/assets/photo.tinified.jpg");
+    ).toBe("/Users/me/assets/photo.polished.jpg");
   });
 
   it("handles URL with format conversion", () => {
@@ -86,7 +86,7 @@ describe("resolveOutputPath", () => {
         outputFormat: "webp",
         cwd: "/Users/me/project",
       })
-    ).toBe("/Users/me/project/photo.tinified.webp");
+    ).toBe("/Users/me/project/photo.polished.webp");
   });
 
   it("uses fallback filename for URLs without clear name", () => {
@@ -99,7 +99,7 @@ describe("resolveOutputPath", () => {
         outputFormat: "png",
         cwd: "/Users/me/project",
       })
-    ).toBe("/Users/me/project/image.tinified.png");
+    ).toBe("/Users/me/project/image.polished.png");
   });
 
   it("treats 'original' format as keeping input extension", () => {
@@ -111,11 +111,11 @@ describe("resolveOutputPath", () => {
         outputPath: undefined,
         outputFormat: "original",
       })
-    ).toBe("/Users/me/hero.tinified.png");
+    ).toBe("/Users/me/hero.polished.png");
   });
 
   describe("seoFilename", () => {
-    it("uses SEO filename instead of tinified suffix when provided", () => {
+    it("uses SEO filename instead of polished suffix when provided", () => {
       expect(
         resolveOutputPath({
           inputPath: "/Users/me/img/hero.png",
@@ -234,8 +234,8 @@ describe("resolveUniqueOutputPath", () => {
     expect(result).toBe("/Users/me/img/scenic-mountain-view-a3f2-4.png");
   });
 
-  it("handles tinified filenames (non-SEO) with collisions", () => {
-    vi.mocked(fs.existsSync).mockImplementation((p) => p === "/Users/me/img/hero.tinified.png");
+  it("handles polished filenames (non-SEO) with collisions", () => {
+    vi.mocked(fs.existsSync).mockImplementation((p) => p === "/Users/me/img/hero.polished.png");
     const result = resolveUniqueOutputPath({
       inputPath: "/Users/me/img/hero.png",
       isUrl: false,
@@ -243,6 +243,6 @@ describe("resolveUniqueOutputPath", () => {
       outputPath: undefined,
       outputFormat: undefined,
     });
-    expect(result).toBe("/Users/me/img/hero.tinified-2.png");
+    expect(result).toBe("/Users/me/img/hero.polished-2.png");
   });
 });

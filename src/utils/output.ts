@@ -11,7 +11,7 @@ interface OutputPathParams {
   cwd?: string;
 }
 
-function getTinifiedFilename(
+function getPolishedFilename(
   filename: string,
   outputFormat: string | undefined,
   seoFilename?: string,
@@ -30,7 +30,7 @@ function getTinifiedFilename(
   }
 
   const name = path.basename(filename, ext);
-  return `${name}.tinified${newExt}`;
+  return `${name}.polished${newExt}`;
 }
 
 function isDirectoryPath(p: string): boolean {
@@ -44,19 +44,19 @@ export function resolveOutputPath(params: OutputPathParams): string {
     return path.resolve(outputPath);
   }
 
-  const tinifiedName = getTinifiedFilename(filename, outputFormat, seoFilename);
+  const polishedName = getPolishedFilename(filename, outputFormat, seoFilename);
 
   if (outputPath && isDirectoryPath(outputPath)) {
-    return path.join(path.resolve(outputPath), tinifiedName);
+    return path.join(path.resolve(outputPath), polishedName);
   }
 
   if (isUrl) {
     const baseDir = cwd ?? process.cwd();
-    return path.join(baseDir, tinifiedName);
+    return path.join(baseDir, polishedName);
   }
 
   const inputDir = path.dirname(path.resolve(inputPath));
-  return path.join(inputDir, tinifiedName);
+  return path.join(inputDir, polishedName);
 }
 
 export function resolveUniqueOutputPath(params: OutputPathParams): string {
