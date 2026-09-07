@@ -9,7 +9,7 @@ vi.mock("node:child_process", () => ({
   }),
 }));
 
-const AUTHORIZE_URL = "https://glassypic.com/mcp/authorize?code=TINI-7X4K-M2P9";
+const AUTHORIZE_URL = "https://glassypic.com/mcp/authorize?code=ABCD-7X4K-M2P9";
 
 describe("openBrowser", () => {
   beforeEach(() => {

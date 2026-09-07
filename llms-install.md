@@ -84,7 +84,7 @@ The server exposes an `optimize_image` tool plus four account management tools.
 - **Upscales** using AI (2x or 4x)
 - **Animated GIFs** supported (processed frame-by-frame)
 - Accepts **local files** or **remote URLs**
-- Saves optimized files next to the original with a `.tinified` suffix
+- Saves optimized files next to the original with a `.polished` suffix
 
 ## Credits
 

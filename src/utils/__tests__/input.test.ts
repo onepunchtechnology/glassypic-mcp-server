@@ -24,7 +24,7 @@ describe("resolveInput", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "tinify-input-test-"));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "glassypic-input-test-"));
   });
 
   afterEach(() => {

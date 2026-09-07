@@ -36,11 +36,11 @@ describe("optimizeImage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(SessionManager).mockImplementation(() => ({
-      sessionDir: "/tmp/.tinify",
+      sessionDir: "/tmp/.glassypic",
       getAuthHeaders: vi.fn().mockReturnValue({}),
       saveToken: vi.fn(),
     }) as any);
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "tinify-optimize-test-"));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "glassypic-optimize-test-"));
 
     // Create a test input file
     fs.writeFileSync(path.join(tmpDir, "hero.png"), "fake-png");
@@ -86,7 +86,7 @@ describe("optimizeImage", () => {
 
     const result = await optimizeImage({
       input: path.join(tmpDir, "hero.png"),
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
     });
 
     expect(result.output_path).toContain("hero-image.png");
@@ -134,7 +134,7 @@ describe("optimizeImage", () => {
       mockHappyPath();
       await optimizeImage({
         input: path.join(tmpDir, "hero.png"),
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         output_upscale_factor: 2,
       });
       expect(vi.mocked(waitForCompletion).mock.calls[0][0].timeoutMs).toBe(120000);
@@ -144,7 +144,7 @@ describe("optimizeImage", () => {
       mockHappyPath({ auto_upscale: true });
       await optimizeImage({
         input: path.join(tmpDir, "hero.png"),
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         output_width_px: 4000, // no explicit upscale factor — server decided
       });
       expect(vi.mocked(waitForCompletion).mock.calls[0][0].timeoutMs).toBe(120000);
@@ -154,7 +154,7 @@ describe("optimizeImage", () => {
       mockHappyPath();
       await optimizeImage({
         input: path.join(tmpDir, "hero.png"),
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
       });
       expect(vi.mocked(waitForCompletion).mock.calls[0][0].timeoutMs).toBe(60000);
     });
@@ -163,7 +163,7 @@ describe("optimizeImage", () => {
       mockHappyPath({ auto_upscale: true });
       await optimizeImage({
         input: path.join(tmpDir, "hero.png"),
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         timeoutMs: 5000,
       });
       expect(vi.mocked(waitForCompletion).mock.calls[0][0].timeoutMs).toBe(5000);
@@ -200,7 +200,7 @@ describe("optimizeImage", () => {
 
     await optimizeImage({
       input: path.join(tmpDir, "hero.png"),
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       output_format: "webp",
       output_width_px: 1920,
       output_height_px: 1080,
@@ -241,7 +241,7 @@ describe("optimizeImage", () => {
 
     await optimizeImage({
       input: path.join(tmpDir, "hero.png"),
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       authToken: "guest_workspace_1",
     });
 
@@ -260,7 +260,7 @@ describe("optimizeImage", () => {
     vi.mocked(SessionManager).mockImplementation(
       () =>
         ({
-          sessionDir: "/tmp/.tinify",
+          sessionDir: "/tmp/.glassypic",
           getAuthHeaders: vi.fn(() =>
             savedToken ? { "X-Session-Token": savedToken } : {}
           ),
@@ -297,7 +297,7 @@ describe("optimizeImage", () => {
     // No authToken param — the exact first-run guest path.
     await optimizeImage({
       input: path.join(tmpDir, "hero.png"),
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
     });
 
     const expectedHeaders = { "X-Session-Token": "fresh-guest-session" };
@@ -345,7 +345,7 @@ describe("optimizeImage", () => {
 
       const result = await optimizeImage({
         input: "https://cdn.example.com/photo.jpg",
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         output_path: tmpDir + "/",
       });
 
@@ -375,7 +375,7 @@ describe("optimizeImage", () => {
     await expect(
       optimizeImage({
         input: path.join(tmpDir, "hero.png"),
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
       })
     ).rejects.toThrow("No job created by the server.");
   });
@@ -391,7 +391,7 @@ describe("optimizeImage", () => {
     vi.mocked(SessionManager).mockImplementation(
       () =>
         ({
-          sessionDir: "/tmp/.tinify",
+          sessionDir: "/tmp/.glassypic",
           getAuthHeaders: vi.fn().mockReturnValue({}),
           saveToken: capturedSaveToken,
         }) as any
@@ -423,7 +423,7 @@ describe("optimizeImage", () => {
 
     await optimizeImage({
       input: path.join(tmpDir, "hero.png"),
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
     });
 
     expect(capturedSaveToken).toHaveBeenCalledWith("fresh-token-xyz");
@@ -456,7 +456,7 @@ describe("optimizeImage", () => {
 
     const result = await optimizeImage({
       input: path.join(tmpDir, "hero.png"),
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
     });
 
     expect(result.output_size_bytes).toBe(12345);
@@ -489,7 +489,7 @@ describe("optimizeImage", () => {
 
     await optimizeImage({
       input: path.join(tmpDir, "hero.png"),
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       output_upscale_factor: 2,
       output_width_px: 1920,
       output_height_px: 1080,
@@ -535,7 +535,7 @@ describe("optimizeImage", () => {
 
       await optimizeImage({
         input: path.join(tmpDir, "hero.png"),
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         output_width_px: 2048,
         output_height_px: 2048,
       });
@@ -549,7 +549,7 @@ describe("optimizeImage", () => {
 
       await optimizeImage({
         input: path.join(tmpDir, "hero.png"),
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         output_width_px: 2048,
         output_height_px: 2048,
         output_resize_behavior: "crop",
@@ -564,7 +564,7 @@ describe("optimizeImage", () => {
 
       await optimizeImage({
         input: path.join(tmpDir, "hero.png"),
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         output_width_px: 2048,
       });
 
@@ -577,7 +577,7 @@ describe("optimizeImage", () => {
 
       await optimizeImage({
         input: path.join(tmpDir, "hero.png"),
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         output_height_px: 1080,
       });
 
@@ -590,7 +590,7 @@ describe("optimizeImage", () => {
 
       await optimizeImage({
         input: path.join(tmpDir, "hero.png"),
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
       });
 
       const processCall = vi.mocked(triggerProcessing).mock.calls[0][0];
@@ -631,7 +631,7 @@ describe("optimizeImage", () => {
 
       const result = await optimizeImage({
         input: path.join(tmpDir, "hero.png"),
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
       });
 
       expect(result.output_path).toContain("scenic-mountain-hero.png");
@@ -644,7 +644,7 @@ describe("optimizeImage", () => {
 
       const result = await optimizeImage({
         input: path.join(tmpDir, "hero.png"),
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         output_seo_tag_gen: false,
       });
 
@@ -656,7 +656,7 @@ describe("optimizeImage", () => {
 
       const result = await optimizeImage({
         input: path.join(tmpDir, "hero.png"),
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
       });
 
       expect(result.output_path).toContain("hero.polished.png");
@@ -669,7 +669,7 @@ describe("optimizeImage", () => {
       const result = await optimizeImage({
         input: path.join(tmpDir, "hero.png"),
         output_path: explicitPath,
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
       });
 
       expect(result.output_path).toBe(explicitPath);
@@ -682,7 +682,7 @@ describe("optimizeImage", () => {
       const result = await optimizeImage({
         input: path.join(tmpDir, "hero.png"),
         output_path: dirPath,
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
       });
 
       expect(result.output_path).toContain("product-photo.png");
@@ -804,7 +804,7 @@ describe("optimizeImage", () => {
     const result = await optimizeImage({
       input: path.join(tmpDir, "hero.png"),
       output_path: deepPath,
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
     });
 
     expect(result.output_path).toBe(deepPath);

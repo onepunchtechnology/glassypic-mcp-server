@@ -9,7 +9,7 @@ describe("waitForCompletion", () => {
     vi.stubGlobal("fetch", realFetch);
 
     waitForCompletion({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       jobId: "job-1",
       timeoutMs: 60000,
       headers: { Authorization: "Bearer mcp_abc" },
@@ -18,7 +18,7 @@ describe("waitForCompletion", () => {
     // Second constructor arg carries a fetch that injects the auth headers.
     const options = ctor.mock.calls[0][1] as { fetch?: Function } | undefined;
     expect(options?.fetch).toBeInstanceOf(Function);
-    await options!.fetch!("https://api.tinify.ai/status/job-1/stream", {
+    await options!.fetch!("https://api.glassypic.com/status/job-1/stream", {
       headers: { Accept: "text/event-stream" },
     });
     const passedInit = realFetch.mock.calls[0][1] as { headers: Record<string, string> };
@@ -40,7 +40,7 @@ describe("waitForCompletion", () => {
     vi.stubGlobal("EventSource", vi.fn(() => mockEventSource));
 
     const promise = waitForCompletion({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       jobId: "job-1",
       timeoutMs: 60000,
     });
@@ -79,7 +79,7 @@ describe("waitForCompletion", () => {
     vi.stubGlobal("EventSource", vi.fn(() => mockEventSource));
 
     const promise = waitForCompletion({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       jobId: "job-1",
       timeoutMs: 60000,
     });
@@ -107,7 +107,7 @@ describe("waitForCompletion", () => {
     vi.stubGlobal("EventSource", vi.fn(() => mockEventSource));
 
     const promise = waitForCompletion({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       jobId: "job-1",
       timeoutMs: 60000,
     });
@@ -130,7 +130,7 @@ describe("waitForCompletion", () => {
     vi.stubGlobal("EventSource", vi.fn(() => mockEventSource));
 
     const promise = waitForCompletion({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       jobId: "job-1",
       timeoutMs: 60000,
     });
@@ -153,7 +153,7 @@ describe("waitForCompletion", () => {
     vi.stubGlobal("EventSource", vi.fn(() => mockEventSource));
 
     const promise = waitForCompletion({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       jobId: "job-1",
       timeoutMs: 60000,
     });
@@ -173,14 +173,14 @@ describe("waitForCompletion", () => {
     vi.stubGlobal("EventSource", MockESConstructor);
 
     waitForCompletion({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       jobId: "job-abc",
       timeoutMs: 60000,
     });
 
     // Second arg is the eventsource options (undefined when no auth headers).
     expect(MockESConstructor).toHaveBeenCalledWith(
-      "https://api.tinify.ai/status/job-abc/stream",
+      "https://api.glassypic.com/status/job-abc/stream",
       undefined
     );
   });
@@ -196,7 +196,7 @@ describe("waitForCompletion", () => {
     vi.stubGlobal("EventSource", vi.fn(() => mockEventSource));
 
     const promise = waitForCompletion({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       jobId: "job-1",
       timeoutMs: 5000,
     });

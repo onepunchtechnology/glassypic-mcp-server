@@ -23,7 +23,7 @@ describe("uploadFile", () => {
     });
 
     const result = await uploadFile({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       fileBuffer: Buffer.from("fake-image"),
       filename: "hero.png",
       authHeaders: {},
@@ -33,7 +33,7 @@ describe("uploadFile", () => {
     expect(result.session_token).toBe("session-abc");
 
     const [url, options] = mockFetch.mock.calls[0];
-    expect(url).toBe("https://api.tinify.ai/upload");
+    expect(url).toBe("https://api.glassypic.com/upload");
     expect(options.method).toBe("POST");
     expect(options.body).toBeInstanceOf(FormData);
   });
@@ -49,7 +49,7 @@ describe("uploadFile", () => {
     });
 
     await uploadFile({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       fileBuffer: Buffer.from("fake"),
       filename: "test.jpg",
       authHeaders: { "X-Session-Token": "existing-token" },
@@ -68,7 +68,7 @@ describe("uploadFile", () => {
 
     await expect(
       uploadFile({
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         fileBuffer: Buffer.from("fake"),
         filename: "bad.bmp",
         authHeaders: {},
@@ -85,7 +85,7 @@ describe("uploadFile", () => {
 
     await expect(
       uploadFile({
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         fileBuffer: Buffer.from("huge"),
         filename: "big.png",
         authHeaders: {},
@@ -107,7 +107,7 @@ describe("uploadFile", () => {
     });
 
     await uploadFile({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       fileBuffer: Buffer.from("data"),
       filename: "test.png",
       authHeaders: {},
@@ -126,7 +126,7 @@ describe("uploadFile", () => {
 
     await expect(
       uploadFile({
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         fileBuffer: Buffer.from("data"),
         filename: "test.png",
         authHeaders: {},
@@ -154,7 +154,7 @@ describe("uploadUrl", () => {
     });
 
     const result = await uploadUrl({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       url: "https://cdn.example.com/photo.jpg",
       filename: "custom-name.jpg",
       authHeaders: { "X-Session-Token": "tok" },
@@ -163,7 +163,7 @@ describe("uploadUrl", () => {
     expect(result.temp_file_id).toBe("temp-url-1");
 
     const [callUrl, options] = mockFetch.mock.calls[0];
-    expect(callUrl).toBe("https://api.tinify.ai/upload/url");
+    expect(callUrl).toBe("https://api.glassypic.com/upload/url");
     expect(options.method).toBe("POST");
     expect(options.headers["Content-Type"]).toBe("application/json");
     const body = JSON.parse(options.body);
@@ -185,7 +185,7 @@ describe("uploadUrl", () => {
     });
 
     await uploadUrl({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       url: "https://cdn.example.com/image.png",
       authHeaders: {},
     });
@@ -203,7 +203,7 @@ describe("uploadUrl", () => {
 
     await expect(
       uploadUrl({
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         url: "https://unreachable.example.com/img.jpg",
         authHeaders: {},
       })
@@ -219,7 +219,7 @@ describe("uploadUrl", () => {
 
     await expect(
       uploadUrl({
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         url: "https://example.com/huge.tiff",
         authHeaders: {},
       })

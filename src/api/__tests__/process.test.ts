@@ -27,7 +27,7 @@ describe("triggerProcessing", () => {
     };
 
     const result = await triggerProcessing({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       tempFileIds: ["temp-1"],
       settings,
       authHeaders: { "X-Session-Token": "token-123" },
@@ -37,7 +37,7 @@ describe("triggerProcessing", () => {
     expect(result.credits_used).toBe(4);
 
     const [url, options] = mockFetch.mock.calls[0];
-    expect(url).toBe("https://api.tinify.ai/auto");
+    expect(url).toBe("https://api.glassypic.com/auto");
     expect(options.method).toBe("POST");
 
     const body = JSON.parse(options.body);
@@ -58,7 +58,7 @@ describe("triggerProcessing", () => {
     });
 
     await triggerProcessing({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       tempFileIds: ["temp-1"],
       settings: {},
       authHeaders: { "X-Session-Token": "my-session-token" },
@@ -80,7 +80,7 @@ describe("triggerProcessing", () => {
     });
 
     await triggerProcessing({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       tempFileIds: ["temp-1"],
       settings: {},
       authHeaders: { "X-Session-Token": "my-session-token" },
@@ -102,7 +102,7 @@ describe("triggerProcessing", () => {
     });
 
     await triggerProcessing({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       tempFileIds: ["temp-1"],
       settings: {},
       authHeaders: {},
@@ -127,7 +127,7 @@ describe("triggerProcessing", () => {
     });
 
     const result = await triggerProcessing({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       tempFileIds: ["temp-1", "temp-2"],
       settings: { output_format: "webp" },
       authHeaders: {},
@@ -148,7 +148,7 @@ describe("triggerProcessing", () => {
 
     await expect(
       triggerProcessing({
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         tempFileIds: ["temp-1"],
         settings: {},
         authHeaders: {},
@@ -206,7 +206,7 @@ describe("triggerProcessing", () => {
 
     await expect(
       triggerProcessing({
-        baseUrl: "https://api.tinify.ai",
+        baseUrl: "https://api.glassypic.com",
         tempFileIds: ["temp-1"],
         settings: { output_seo_tag_gen: true },
         authHeaders: { "X-Session-Token": "token" },

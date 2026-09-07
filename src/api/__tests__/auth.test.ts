@@ -4,7 +4,7 @@ import { requestDeviceCode, pollForToken, revokeToken, getAccountStatus } from "
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
-const BASE_URL = "https://api.tinify.ai";
+const BASE_URL = "https://api.glassypic.com";
 
 describe("requestDeviceCode", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -12,12 +12,12 @@ describe("requestDeviceCode", () => {
   it("POSTs to /mcp/auth/device-code", async () => {
     mockFetch.mockResolvedValue({
       ok: true,
-      json: async () => ({ device_code: "dc_abc", user_code: "TINI-7X4K-M2P9", verify_url: "https://tinify.ai/mcp/authorize" }),
+      json: async () => ({ device_code: "dc_abc", user_code: "ABCD-7X4K-M2P9", verify_url: "https://glassypic.com/mcp/authorize" }),
     });
     const result = await requestDeviceCode(BASE_URL);
     expect(mockFetch).toHaveBeenCalledWith(`${BASE_URL}/mcp/auth/device-code`, { method: "POST" });
     expect(result.device_code).toBe("dc_abc");
-    expect(result.user_code).toBe("TINI-7X4K-M2P9");
+    expect(result.user_code).toBe("ABCD-7X4K-M2P9");
   });
 });
 

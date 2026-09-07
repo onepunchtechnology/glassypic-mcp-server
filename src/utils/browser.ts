@@ -8,8 +8,8 @@ import { execFile } from "node:child_process";
  * still open https://evil.example/harvest if that value were ever wrong. This
  * list is what actually closes that path.
  *
- * tinify.ai is retained because the pre-rename authorize URL may still be served
- * during migration. Drop it once settings.web_url is glassypic.com everywhere.
+ * The legacy host is retained because a pre-rename authorize URL may still be
+ * served during migration. Drop it once settings.web_url is glassypic.com everywhere.
  */
 const OWNED_HOSTS = ["glassypic.com", "tinify.ai"];
 

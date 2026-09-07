@@ -69,11 +69,11 @@ describe("optimize_image in remote mode", () => {
     const { optimizeImage } = await import("../optimize.js");
     const result = await optimizeImage({
       input: "https://example.com/photo.jpg",
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
     });
 
     // Should return download URL, not a local path
-    expect(result.output_path).toBe("https://api.tinify.ai/download/job-abc");
+    expect(result.output_path).toBe("https://api.glassypic.com/download/job-abc");
     expect(result.output_size_bytes).toBe(45000);
     expect(result.output_format).toBe("jpg");
   });

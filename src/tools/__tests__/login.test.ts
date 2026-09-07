@@ -40,7 +40,7 @@ vi.mock("../../session/manager.js", () => ({
 }));
 
 vi.mock("../../api/client.js", () => ({
-  DEFAULT_BASE_URL: "https://api.tinify.ai",
+  DEFAULT_BASE_URL: "https://api.glassypic.com",
   resolveApiBaseUrl: () => ({ baseUrl: "https://api.glassypic.com", isLoopback: false }),
 }));
 
@@ -48,8 +48,8 @@ import { loginTool } from "../login.js";
 
 const DEVICE_CODE_RESPONSE = {
   device_code: "dc_test",
-  user_code: "TINI-ABCD-EFGH",
-  verify_url: "https://tinify.ai/mcp/authorize",
+  user_code: "ABCD-1234-EFGH",
+  verify_url: "https://glassypic.com/mcp/authorize",
 };
 
 describe("loginTool", () => {

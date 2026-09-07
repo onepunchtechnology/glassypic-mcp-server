@@ -19,7 +19,7 @@ describe("downloadFile", () => {
     });
 
     const result = await downloadFile({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       jobId: "job-1",
     });
 
@@ -36,12 +36,12 @@ describe("downloadFile", () => {
     });
 
     await downloadFile({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       jobId: "job-1",
       authHeaders: { "X-Session-Token": "guest-token" },
     });
 
-    expect(mockFetch).toHaveBeenCalledWith("https://api.tinify.ai/download/job-1", {
+    expect(mockFetch).toHaveBeenCalledWith("https://api.glassypic.com/download/job-1", {
       headers: { "X-Session-Token": "guest-token" },
     });
   });
@@ -54,7 +54,7 @@ describe("downloadFile", () => {
     });
 
     await expect(
-      downloadFile({ baseUrl: "https://api.tinify.ai", jobId: "job-1" })
+      downloadFile({ baseUrl: "https://api.glassypic.com", jobId: "job-1" })
     ).rejects.toThrow("Job has expired");
   });
 
@@ -66,7 +66,7 @@ describe("downloadFile", () => {
     });
 
     await expect(
-      downloadFile({ baseUrl: "https://api.tinify.ai", jobId: "job-1" })
+      downloadFile({ baseUrl: "https://api.glassypic.com", jobId: "job-1" })
     ).rejects.toThrow("Job not completed");
   });
 
@@ -78,7 +78,7 @@ describe("downloadFile", () => {
     });
 
     await expect(
-      downloadFile({ baseUrl: "https://api.tinify.ai", jobId: "job-1" })
+      downloadFile({ baseUrl: "https://api.glassypic.com", jobId: "job-1" })
     ).rejects.toThrow("Job not found");
   });
 
@@ -90,7 +90,7 @@ describe("downloadFile", () => {
     });
 
     await expect(
-      downloadFile({ baseUrl: "https://api.tinify.ai", jobId: "job-1" })
+      downloadFile({ baseUrl: "https://api.glassypic.com", jobId: "job-1" })
     ).rejects.toThrow("Server error");
   });
 
@@ -102,7 +102,7 @@ describe("downloadFile", () => {
     });
 
     const result = await downloadFile({
-      baseUrl: "https://api.tinify.ai",
+      baseUrl: "https://api.glassypic.com",
       jobId: "job-1",
     });
 

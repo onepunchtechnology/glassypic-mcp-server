@@ -22,7 +22,7 @@ vi.mock("../../api/auth.js", () => ({
 }));
 
 vi.mock("../../api/client.js", () => ({
-  DEFAULT_BASE_URL: "https://api.tinify.ai",
+  DEFAULT_BASE_URL: "https://api.glassypic.com",
   getAuthHeaders: getAuthHeadersMock,
   resolveApiBaseUrl: resolveApiBaseUrlMock,
 }));
