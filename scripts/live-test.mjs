@@ -291,10 +291,10 @@ try {
 
   // Naming depends on whether an SEO filename came back. src/utils/output.ts:28-33
   // returns `${seoFilename}${ext}` when one exists and falls back to
-  // `${name}.polished${ext}` when it doesn't, which src/index.ts:60 documents as
-  // "named with SEO slug when SEO is enabled or .polished suffix otherwise".
+  // `${name}.tinified${ext}` when it doesn't, which src/index.ts:60 documented as
+  // "named with SEO slug when SEO is enabled or .tinified suffix otherwise".
   //
-  // This assertion used to require `.polished.` unconditionally. It predates the
+  // This assertion used to require `.tinified.` unconditionally. It predates the
   // SEO-slug naming and had been failing silently ever since, because test:live is
   // not in `npm test` or CI so nothing ran it — the same reason the version
   // assertion above sat pinned at 2.0.0 across two releases.
