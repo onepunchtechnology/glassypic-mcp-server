@@ -8,10 +8,11 @@ import { execFile } from "node:child_process";
  * still open https://evil.example/harvest if that value were ever wrong. This
  * list is what actually closes that path.
  *
- * `tinify.ai` is retained because a pre-rename authorize URL may still be
- * served during migration. Drop it once settings.web_url is glassypic.com everywhere.
+ * `tinify.ai` was removed 2026-09-10: settings.web_url is glassypic.com in every
+ * environment, and the domain is being transferred to Tinify B.V. — after which
+ * trusting it would hand a third party's host to the user's browser.
  */
-const OWNED_HOSTS = ["glassypic.com", "tinify.ai"];
+const OWNED_HOSTS = ["glassypic.com"];
 
 function isOwnedHost(hostname: string): boolean {
   return OWNED_HOSTS.some((h) => hostname === h || hostname.endsWith(`.${h}`));
