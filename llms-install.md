@@ -79,12 +79,12 @@ The server exposes an `optimize_image` tool plus four account management tools.
 `optimize_image`:
 - **Compresses** images using smart lossy compression (typically 60-80% size reduction)
 - **Generates SEO metadata** (alt text, keywords, filename) using AI
-- **Converts formats** (JPG, PNG, WebP, AVIF, GIF)
+- **Converts formats** (JPG, PNG, WebP, AVIF, GIF, SVG, ICO)
 - **Resizes** to specific dimensions
 - **Upscales** using AI (2x or 4x)
 - **Animated GIFs** supported (processed frame-by-frame)
 - Accepts **local files** or **remote URLs**
-- Saves optimized files next to the original with a `.polished` suffix
+- Saves next to the original using the SEO filename when one is generated, otherwise a `.polished` suffix
 
 ## Credits
 

@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-brightgreen.svg)](https://modelcontextprotocol.io)
 
-MCP server for [GlassyPic](https://glassypic.com). One tool that turns raw images into production-ready assets. Support upscaling, resizing/cropping, compression, file format conversion, and SEO filename & alt text generation. Just describe the outcome you want in natrual language.
+MCP server for [GlassyPic](https://glassypic.com). One tool that turns raw images into production-ready assets: upscaling, resizing and cropping, compression, file format conversion, and SEO filename and alt text generation. Describe the outcome you want in natural language.
 
 ## Quick Start
 
@@ -162,15 +162,15 @@ args = ["-y", "@glassypic/mcp-server@latest"]
 
 ## Tool: `optimize_image`
 
-One tool that turns raw images into production-ready assets using AI-powered algorithm and multi-step agents (typically 60-80% size reduction), with optional resize, upscale, format conversion, and SEO metadata generation. Supports JPEG, PNG, WebP, HEIC, GIF, AVIF, TIFF, and BMP. Accepts absolute local file paths or remote URLs.
+One tool that turns a supplied image into a production-ready asset through a fixed server-side pipeline (typically 60-80% size reduction), with optional resize, upscale, format conversion, and SEO metadata generation. Inputs include JPEG, PNG, WebP, AVIF, GIF, SVG, ICO, HEIC, TIFF, and BMP. Outputs are JPEG, PNG, WebP, AVIF, GIF, SVG, and ICO. Accepts absolute local file paths or remote URLs.
 
 ### Parameters
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | `input` | string | Yes | — | Absolute local file path or remote URL |
-| `output_path` | string | No | auto | File path or directory (ending in `/`). If omitted: saves next to original with SEO slug or `.glassypic` suffix |
-| `output_format` | string | No | original | `jpg`, `png`, `webp`, `avif`, `gif`, or `original` |
+| `output_path` | string | No | auto | File path or directory (ending in `/`). If omitted: saves next to the original, using the SEO slug when one is generated, otherwise a `.polished` suffix |
+| `output_format` | string | No | original | `jpg`, `png`, `webp`, `avif`, `gif`, `svg`, `ico`, or `original` |
 | `output_width_px` | int | No | — | Target width in pixels |
 | `output_height_px` | int | No | — | Target height in pixels |
 | `output_upscale_factor` | int | No | — | AI upscale factor: `2` (2×) or `4` (4×) |
@@ -316,11 +316,12 @@ Convert favicon.ico to PNG
 ```
 Local file or URL
   → Upload to GlassyPic API
-    → Smart compression (lossy, typically 60-80% reduction)
-    → AI SEO tag generation (alt text, keywords, filename)
-    → Optional: resize, upscale, format conversion
+    → Optional AI upscale (explicit, or automatic when a resize target exceeds the source by more than 1.2×)
+    → Optional resize
+    → Compression
+    → Optional SEO metadata
   → Download optimized file
-    → Save with SEO filename slug (or .glassypic suffix if SEO disabled)
+    → Save with the SEO filename slug, or a `.polished` suffix when SEO is off or returns no slug
 ```
 
 All processing happens server-side via the [GlassyPic API](https://api.glassypic.com). The MCP server is a thin client that orchestrates the pipeline.
@@ -491,6 +492,10 @@ request to the wrong endpoint.
 
 - Node.js >= 18
 - An MCP-compatible client (Claude Desktop, Claude Code, Cursor, Windsurf, Cline, OpenAI Codex CLI, Gemini CLI, etc.)
+
+## Security
+
+Report vulnerabilities privately. See [SECURITY.md](SECURITY.md). Do not file a public issue for an unfixed security report.
 
 ## License
 

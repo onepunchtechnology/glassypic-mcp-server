@@ -34,7 +34,7 @@ export function isDirectEntrypoint(argvPath: string | undefined, modulePath: str
 export function createServer(): McpServer {
   const server = new McpServer({
     name: "glassypic",
-    version: "2.1.0",
+    version: "2.1.1",
   });
 
 server.registerTool(
@@ -131,7 +131,7 @@ server.registerTool(
       output_size_bytes: z.number().describe("File size of the optimized image in bytes"),
       output_width_px: z.number().nullable().describe("Width of the output image in pixels"),
       output_height_px: z.number().nullable().describe("Height of the output image in pixels"),
-      output_format: z.string().nullable().describe("Output format: jpg, png, webp, avif, or gif"),
+      output_format: z.string().nullable().describe("Output format: jpg, png, webp, avif, gif, svg, or ico"),
       compression_ratio: z.number().nullable().describe("Output-to-input size ratio, e.g. 0.35 means 65% smaller"),
       seo_alt_text: z.string().nullable().describe("AI-generated image alt text for accessibility and SEO"),
       seo_keywords: z.array(z.string()).nullable().describe("AI-generated keywords describing the image"),
