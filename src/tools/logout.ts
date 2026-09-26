@@ -1,6 +1,6 @@
 import { SessionManager } from "../session/manager.js";
 import { resolveApiBaseUrl } from "../api/client.js";
-import { revokeToken } from "../api/auth.js";
+import { getAccountStatus, revokeToken } from "../api/auth.js";
 
 export async function logoutTool(): Promise<string> {
   const sessionManager = new SessionManager();
@@ -10,14 +10,19 @@ export async function logoutTool(): Promise<string> {
     return "Not logged in. Already using guest session (20 free credits/day).";
   }
 
-  // Configuration must never block a local clear — resolve the base URL only
-  // here, where revocation actually needs it, and treat a resolution failure
-  // (e.g. a malformed GLASSYPIC_API_URL) the same as a revocation failure: the
-  // user still ends up logged out locally, even when the network is
-  // unreachable or misconfigured.
+  // Confirm that the token still represents an authenticated account before
+  // describing this as a logout. A stale token can make status report guest
+  // while its mere presence would otherwise produce the logged-out wording.
   let revokeFailed = false;
   try {
     const { baseUrl } = resolveApiBaseUrl();
+    const status = await getAccountStatus(baseUrl, {
+      Authorization: `Bearer ${mcpToken}`,
+    });
+    if (!status.logged_in) {
+      sessionManager.clearMcpToken();
+      return "Not logged in. Already using guest session (20 free credits/day).";
+    }
     await revokeToken(baseUrl, mcpToken);
   } catch {
     revokeFailed = true;

@@ -38,26 +38,43 @@ describe("logoutTool", () => {
 
   it("revokes and clears token when logged in", async () => {
     getMcpTokenMock.mockReturnValue("mcp_active");
+    getAccountStatusMock.mockResolvedValue({ logged_in: true });
     revokeTokenMock.mockResolvedValue(undefined);
 
     const result = await logoutTool();
 
+    expect(getAccountStatusMock).toHaveBeenCalledWith(
+      expect.any(String),
+      { Authorization: "Bearer mcp_active" },
+    );
     expect(revokeTokenMock).toHaveBeenCalledWith(expect.any(String), "mcp_active");
     expect(clearMcpTokenMock).toHaveBeenCalledOnce();
     expect(result).toMatch(/logged out/i);
   });
 
-  it("returns 'not logged in' message when no token", async () => {
+  it("returns the precise guest message when no token exists", async () => {
     getMcpTokenMock.mockReturnValue(null);
 
     const result = await logoutTool();
 
+    expect(getAccountStatusMock).not.toHaveBeenCalled();
     expect(revokeTokenMock).not.toHaveBeenCalled();
-    expect(result).toMatch(/not logged in/i);
+    expect(result).toBe("Not logged in. Already using guest session (20 free credits/day).");
+  });
+  it("clears a stale token and keeps the guest message when status says not logged in", async () => {
+    getMcpTokenMock.mockReturnValue("mcp_expired");
+    getAccountStatusMock.mockResolvedValue({ logged_in: false });
+
+    const result = await logoutTool();
+
+    expect(revokeTokenMock).not.toHaveBeenCalled();
+    expect(clearMcpTokenMock).toHaveBeenCalledOnce();
+    expect(result).toBe("Not logged in. Already using guest session (20 free credits/day).");
   });
 
   it("still clears the token locally when revokeToken throws, and warns", async () => {
     getMcpTokenMock.mockReturnValue("mcp_active");
+    getAccountStatusMock.mockResolvedValue({ logged_in: true });
     revokeTokenMock.mockRejectedValue(new Error("network error"));
 
     const result = await logoutTool();
@@ -69,6 +86,7 @@ describe("logoutTool", () => {
 
   it("returns the plain message when revocation succeeds", async () => {
     getMcpTokenMock.mockReturnValue("mcp_active");
+    getAccountStatusMock.mockResolvedValue({ logged_in: true });
     revokeTokenMock.mockResolvedValue(undefined);
 
     const result = await logoutTool();

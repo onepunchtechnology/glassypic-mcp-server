@@ -34,7 +34,7 @@ export function isDirectEntrypoint(argvPath: string | undefined, modulePath: str
 export function createServer(): McpServer {
   const server = new McpServer({
     name: "glassypic",
-    version: "2.1.1",
+    version: "2.1.2",
   });
 
 server.registerTool(
@@ -126,16 +126,18 @@ server.registerTool(
         .optional()
         .describe("Internal: temp file ID from a previous GIF cost warning. Skips re-upload."),
     },
+    // Keep nullable primitive branches portable: zod-to-json-schema otherwise emits
+    // type arrays that some MCP clients reject. These constraints are wire-neutral.
     outputSchema: {
       output_path: z.string().describe("Absolute path where the optimized file was saved"),
       output_size_bytes: z.number().describe("File size of the optimized image in bytes"),
-      output_width_px: z.number().nullable().describe("Width of the output image in pixels"),
-      output_height_px: z.number().nullable().describe("Height of the output image in pixels"),
-      output_format: z.string().nullable().describe("Output format: jpg, png, webp, avif, gif, svg, or ico"),
-      compression_ratio: z.number().nullable().describe("Output-to-input size ratio, e.g. 0.35 means 65% smaller"),
-      seo_alt_text: z.string().nullable().describe("AI-generated image alt text for accessibility and SEO"),
-      seo_keywords: z.array(z.string()).nullable().describe("AI-generated keywords describing the image"),
-      seo_filename: z.string().nullable().describe("AI-generated SEO filename slug without extension"),
+      output_width_px: z.union([z.number().finite(), z.null()]).describe("Width of the output image in pixels"),
+      output_height_px: z.union([z.number().finite(), z.null()]).describe("Height of the output image in pixels"),
+      output_format: z.union([z.string().min(0), z.null()]).describe("Output format: jpg, png, webp, avif, gif, svg, or ico"),
+      compression_ratio: z.union([z.number().finite(), z.null()]).describe("Output-to-input size ratio, e.g. 0.35 means 65% smaller"),
+      seo_alt_text: z.union([z.string().min(0), z.null()]).describe("AI-generated image alt text for accessibility and SEO"),
+      seo_keywords: z.union([z.array(z.string()), z.null()]).describe("AI-generated keywords describing the image"),
+      seo_filename: z.union([z.string().min(0), z.null()]).describe("AI-generated SEO filename slug without extension"),
     },
     annotations: {
       readOnlyHint: false,

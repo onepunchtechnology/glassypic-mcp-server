@@ -292,6 +292,29 @@ try {
 
   const byName = Object.fromEntries(tools.map((t) => [t.name, t]));
 
+  const outputSchemaProperties = byName.optimize_image.outputSchema?.properties;
+  assert(outputSchemaProperties && typeof outputSchemaProperties === "object", "optimize_image has no outputSchema properties");
+  const nullableOutputFields = [
+    ["output_width_px", "number"],
+    ["output_height_px", "number"],
+    ["output_format", "string"],
+    ["compression_ratio", "number"],
+    ["seo_alt_text", "string"],
+    ["seo_keywords", "array"],
+    ["seo_filename", "string"],
+  ];
+  for (const [field, valueType] of nullableOutputFields) {
+    const schema = outputSchemaProperties[field];
+    assert(Array.isArray(schema?.anyOf), `optimize_image outputSchema.${field} must use anyOf for nullability`);
+    assert(!Array.isArray(schema?.type), `optimize_image outputSchema.${field} must not use a multi-type type array`);
+    assert(
+      schema.anyOf.some((branch) => branch.type === valueType) &&
+        schema.anyOf.some((branch) => branch.type === "null"),
+      `optimize_image outputSchema.${field} must include ${valueType} and null branches`,
+    );
+  }
+  console.log(green("✓ nullable optimize_image output fields use portable anyOf schemas"));
+
   assert(
     byName.status.annotations.readOnlyHint === true,
     `status.annotations.readOnlyHint should be true, got ${JSON.stringify(byName.status.annotations.readOnlyHint)}`
